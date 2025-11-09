@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +37,17 @@ public class SongsFragment extends Fragment {
     private static final int REQ_PERM = 1001;
     private RecyclerView recyclerView;
     private Button btnRefresh;
+    private LinearLayout headerLayout;
+    private TextView txtAlbumFilter;
+    private Button btnClearFilter;
+
+    // Filter variables
+    private Long filterAlbumId = null;
+    private String filterAlbumName = null;
+    private String filterArtistName = null;
+    private List<Song> allSongs = new ArrayList<>();
+    private SongAdapter songAdapter;
+    private boolean isFilterAppliedFromAlbum = false; // Track if filter came from album click
 
     @Nullable
     @Override
@@ -44,10 +57,24 @@ public class SongsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_songs);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        headerLayout = view.findViewById(R.id.header_layout);
+        txtAlbumFilter = view.findViewById(R.id.txt_album_filter);
+        btnClearFilter = view.findViewById(R.id.btn_clear_filter);
+
         btnRefresh = view.findViewById(R.id.btn_refresh_songs);
         btnRefresh.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Đang quét file nhạc...", Toast.LENGTH_SHORT).show();
             scanMediaFiles();
+        });
+
+        // Clear filter button
+        btnClearFilter.setOnClickListener(v -> {
+            filterAlbumId = null;
+            filterAlbumName = null;
+            filterArtistName = null;
+            headerLayout.setVisibility(View.GONE);
+            refreshSongList();
+            Toast.makeText(getContext(), "Đã hiển thị tất cả bài hát", Toast.LENGTH_SHORT).show();
         });
 
         if (!hasPermission()) {
@@ -57,6 +84,53 @@ public class SongsFragment extends Fragment {
         }
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Reset filter when user returns to Songs tab (not from album click)
+        if (!isFilterAppliedFromAlbum && (filterAlbumId != null || filterArtistName != null)) {
+            // Clear filter silently when returning to tab
+            filterAlbumId = null;
+            filterAlbumName = null;
+            filterArtistName = null;
+            if (headerLayout != null) {
+                headerLayout.setVisibility(View.GONE);
+            }
+            refreshSongList();
+        }
+        // Reset the flag after checking
+        isFilterAppliedFromAlbum = false;
+    }
+
+    // Method to apply album filter from MainActivity
+    public void applyAlbumFilter(long albumId, String albumName) {
+        this.filterAlbumId = albumId;
+        this.filterAlbumName = albumName;
+        this.isFilterAppliedFromAlbum = true; // Mark that filter is being applied
+
+        // Show header with album name
+        headerLayout.setVisibility(View.VISIBLE);
+        txtAlbumFilter.setText("📀 Album: " + albumName);
+
+        // Refresh song list with filter
+        refreshSongList();
+    }
+
+    // Method mới: lọc theo nghệ sĩ
+    public void applyArtistFilter(String artistName, String albumName) {
+        this.filterAlbumId = null;
+        this.filterAlbumName = albumName;
+        this.filterArtistName = artistName;
+        this.isFilterAppliedFromAlbum = true; // Mark that filter is being applied
+
+        // Show header with album name
+        headerLayout.setVisibility(View.VISIBLE);
+        txtAlbumFilter.setText("📀 Album: " + albumName);
+
+        // Refresh song list with filter
+        refreshSongList();
     }
 
     private boolean hasPermission() {
@@ -144,6 +218,9 @@ public class SongsFragment extends Fragment {
             final int songCount = songs.size();
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
+                    // Store all songs
+                    allSongs = songs;
+
                     if (songCount == 0) {
                         Toast.makeText(getContext(), "Không tìm thấy bài hát!\nHãy thêm file MP3 vào Download/Music và nhấn 'Quét lại'", Toast.LENGTH_LONG).show();
                         Log.w(TAG, "No songs loaded - MediaStore is empty");
@@ -151,10 +228,49 @@ public class SongsFragment extends Fragment {
                         Toast.makeText(getContext(), "Tìm thấy " + songCount + " bài hát", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "Successfully loaded " + songCount + " songs");
                     }
-                    recyclerView.setAdapter(new SongAdapter(getContext(), songs));
+
+                    // Apply filter if exists
+                    refreshSongList();
                 });
             }
         }).start();
+    }
+
+    private void refreshSongList() {
+        if (filterAlbumId != null) {
+            // Filter songs by album
+            List<Song> filteredSongs = new ArrayList<>();
+            for (Song song : allSongs) {
+                if (song.getAlbumId() == filterAlbumId) {
+                    filteredSongs.add(song);
+                }
+            }
+
+            songAdapter = new SongAdapter(getContext(), filteredSongs);
+            recyclerView.setAdapter(songAdapter);
+
+            Toast.makeText(getContext(), "Tìm thấy " + filteredSongs.size() + " bài hát trong album này", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Filtered songs by albumId=" + filterAlbumId + ", count: " + filteredSongs.size());
+        } else if (filterArtistName != null) {
+            // Filter songs by artist
+            List<Song> filteredSongs = new ArrayList<>();
+            for (Song song : allSongs) {
+                if (song.getArtist().equalsIgnoreCase(filterArtistName)) {
+                    filteredSongs.add(song);
+                }
+            }
+
+            songAdapter = new SongAdapter(getContext(), filteredSongs);
+            recyclerView.setAdapter(songAdapter);
+
+            Toast.makeText(getContext(), "Tìm thấy " + filteredSongs.size() + " bài hát của nghệ sĩ này", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Filtered songs by artist=" + filterArtistName + ", count: " + filteredSongs.size());
+        } else {
+            // Show all songs
+            songAdapter = new SongAdapter(getContext(), allSongs);
+            recyclerView.setAdapter(songAdapter);
+            Log.d(TAG, "Showing all songs, count: " + allSongs.size());
+        }
     }
 
     @Override

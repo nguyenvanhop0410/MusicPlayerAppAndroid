@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -68,10 +69,22 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
         }
 
         holder.itemView.setOnClickListener(v -> {
-            // For now open SongListActivity (could filter by album in future)
-            Intent i = new Intent(context, SongListFragment.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(i);
+            // Switch to Songs tab with album filter
+            if (context instanceof com.example.musicapplication.main.MainActivity) {
+                com.example.musicapplication.main.MainActivity mainActivity =
+                        (com.example.musicapplication.main.MainActivity) context;
+
+                // Kiểm tra loại filter
+                if ("artist".equals(a.filterType)) {
+                    // Lọc theo nghệ sĩ
+                    mainActivity.switchToSongsWithArtistFilter(a.filterValue, a.title);
+                    Toast.makeText(context, "Đang tải bài hát của: " + a.filterValue, Toast.LENGTH_SHORT).show();
+                } else {
+                    // Lọc theo albumId (mặc định)
+                    mainActivity.switchToSongsWithAlbumFilter(a.id, a.title);
+                    Toast.makeText(context, "Đang tải bài hát trong album: " + a.title, Toast.LENGTH_SHORT).show();
+                }
+            }
         });
     }
 

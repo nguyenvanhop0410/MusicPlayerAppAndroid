@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.musicapplication.R;
 import com.example.musicapplication.adapter.SongAdapter;
 import com.example.musicapplication.model.Song;
+import com.example.musicapplication.player.PlaylistManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +149,15 @@ public class SongListFragment extends AppCompatActivity {
                     Toast.makeText(this, "Tìm thấy " + songCount + " bài hát", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "Successfully loaded " + songCount + " songs");
                 }
+
+                // Lưu playlist vào PlaylistManager
+                PlaylistManager.getInstance().setPlaylist(songs);
+                Log.d(TAG, "✅ Playlist saved to PlaylistManager: " + songs.size() + " songs");
+
+                // Verify playlist was saved
+                int savedSize = PlaylistManager.getInstance().getPlaylistSize();
+                Log.d(TAG, "✅ Verified playlist size in PlaylistManager: " + savedSize);
+
                 recyclerView.setAdapter(new SongAdapter(SongListFragment.this, songs));
             });
         }).start();

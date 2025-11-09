@@ -27,4 +27,16 @@ public class Song {
     public String toString() {
         return title + (artist != null && !artist.isEmpty() ? " - " + artist : "");
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public long getAlbumId() {
+        return albumId;
+    }
 }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.musicapplication.R;
@@ -55,5 +56,35 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }).attach();
+    }
+
+    // Method to switch to Songs tab with album filter
+    public void switchToSongsWithAlbumFilter(long albumId, String albumName) {
+        // Switch to Songs tab (index 0)
+        viewPager.setCurrentItem(0);
+
+        // Wait a bit for fragment to be ready, then apply filter
+        viewPager.postDelayed(() -> {
+            // Get the SongsFragment from adapter
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag("f0"); // f0 = first tab
+            if (fragment instanceof com.example.musicapplication.fragments.SongsFragment) {
+                ((com.example.musicapplication.fragments.SongsFragment) fragment).applyAlbumFilter(albumId, albumName);
+            }
+        }, 100);
+    }
+
+    // Method to switch to Songs tab with artist filter
+    public void switchToSongsWithArtistFilter(String artistName, String albumName) {
+        // Switch to Songs tab (index 0)
+        viewPager.setCurrentItem(0);
+
+        // Wait a bit for fragment to be ready, then apply filter
+        viewPager.postDelayed(() -> {
+            // Get the SongsFragment from adapter
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag("f0"); // f0 = first tab
+            if (fragment instanceof com.example.musicapplication.fragments.SongsFragment) {
+                ((com.example.musicapplication.fragments.SongsFragment) fragment).applyArtistFilter(artistName, albumName);
+            }
+        }, 100);
     }
 }
