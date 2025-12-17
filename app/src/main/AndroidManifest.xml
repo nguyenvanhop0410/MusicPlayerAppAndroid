@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Permissions for reading audio files (handle both pre/post Android 13) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" /> <!-- Internet permission for Firebase and streaming -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".MusicApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,6 +21,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicApplication">
         <activity
+            android:name=".main.AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main.PrivacyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main.AddSongPlaylistActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main.PlaylistDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main.GenreDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main.AllAlbumsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main.AlbumDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".main.MainActivity"
             android:exported="true">
             <intent-filter>
@@ -24,15 +49,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Activities for music features -->
-        <activity android:name=".main.SongListFragment" android:exported="false" />
-        <activity android:name=".main.AlbumListFragment" android:exported="false" />
-        <activity android:name=".main.PlayerFragment" android:exported="false" />
-        <activity android:name=".profile.ProfileActivity" android:exported="false" />
-        <activity android:name=".auth.LoginActivity" android:exported="false" />
-        <activity android:name=".auth.RegisterActivity" android:exported="false" />
+        </activity> <!-- Activities for music features -->
+        <activity
+            android:name=".main.PlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity
+            android:name=".upload.UploadSongActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.RegisterActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

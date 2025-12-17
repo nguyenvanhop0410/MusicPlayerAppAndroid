@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- LỚP NỀN TỐI -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#6632D2A4"
+                android:endColor="#1C1C1C"
+                android:angle="270"/>
+        </shape>
+    </item>
+
+    <!-- LỚP ÁNH SÁNG TÍM MỜ -->
+    <item android:top="-120dp" android:left="-80dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="420dp"
+                android:centerX="30%"
+                android:centerY="30%"
+                android:startColor="#665C7CFA"
+                android:endColor="@android:color/transparent"/>
+        </shape>
+    </item>
+
+    <!-- LỚP ÁNH SÁNG XANH LAM -->
+    <item android:bottom="-140dp" android:right="-100dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="500dp"
+                android:centerX="70%"
+                android:centerY="80%"
+                android:startColor="#66FF4E50"
+                android:endColor="@android:color/transparent"/>
+        </shape>
+    </item>
+
+    <!-- LỚP ÁNH SÁNG HỒNG NHẸ -->
+    <item android:top="-180dp" android:right="-120dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="380dp"
+                android:centerX="85%"
+                android:centerY="20%"
+                android:startColor="#33FF5DA2"
+                android:endColor="@android:color/transparent"/>
+        </shape>
+    </item>
+
+</layer-list>

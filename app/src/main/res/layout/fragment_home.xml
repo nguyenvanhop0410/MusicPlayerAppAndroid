@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_layout">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/background_dark"
+            app:title="Home"
+            app:titleTextColor="@color/text_primary"
+            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineSmall">
+
+            <ImageView
+                android:id="@+id/img_profile"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_profile"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Profile"
+                android:scaleType="centerCrop" />
+
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="100dp"> <!-- Padding dưới để không bị MiniPlayer che -->
+
+            <!-- 1. BANNER SLIDER -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vp_slider"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- 2. ALBUMS (GRID VIEW) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Albums"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/tv_see_all_albums"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="See all >"
+                    android:textColor="@color/accent_primary"
+                    android:textSize="14sp"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+            </LinearLayout>
+
+            <!-- Grid 2 cột cho Album -->
+            <!-- QUAN TRỌNG: nestedScrollingEnabled="false" để fix lỗi hiển thị trong ScrollView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_albums"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingHorizontal="12dp"
+                android:clipToPadding="false"/>
+
+            <!-- NEW SONGS (Bài hát mới) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="New Songs"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- List ngang cho New Songs -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_new_songs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp"/>
+
+            <!-- 3. POPULAR SONGS (Lượt nghe cao) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Popular Songs"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- List dọc cho Popular -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_popular"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingHorizontal="16dp"/>
+
+            <!-- Loading -->
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginTop="24dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

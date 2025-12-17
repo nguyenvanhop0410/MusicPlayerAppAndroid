@@ -8,10 +8,11 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.musicapplication.model.Song;
+import com.example.musicapplication.domain.model.Song;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MusicPlayer {
     private static final String TAG = "MusicPlayer";
@@ -19,14 +20,21 @@ public class MusicPlayer {
     private final MediaPlayer mediaPlayer;
     private String currentUri;
     private final Context ctx;
-    private AudioManager audioManager;
-    private boolean isRepeatEnabled = false;
-    private OnCompletionListener onCompletionListener;
+    private final AudioManager audioManager;
+
+    // --- DANH SÁCH LISTENER (Quan trọng cho MiniPlayer) ---
+    // Dùng List để nhiều màn hình cùng lắng nghe được sự kiện
+    private final List<OnCompletionListener> listeners = new ArrayList<>();
+
     private List<Song> playlist;
     private int currentSongIndex = -1;
-    private boolean isPreparing = false; // Thêm flag để tránh double-call
 
-    // Interface for completion callback
+    // --- CÁC BIẾN TRẠNG THÁI ---
+    private boolean isRepeatEnabled = false;
+    private boolean isShuffleEnabled = false;
+    private boolean isPreparing = false;
+    private boolean isPrepared = false;
+
     public interface OnCompletionListener {
         void onCompletion();
         void onNextSong(Song song);
@@ -38,7 +46,6 @@ public class MusicPlayer {
         mediaPlayer = new MediaPlayer();
         audioManager = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
 
-        // Set audio attributes for music playback
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -48,8 +55,6 @@ public class MusicPlayer {
         } else {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         }
-
-        Log.d(TAG, "MusicPlayer initialized with audio attributes");
     }
 
     public static synchronized MusicPlayer getInstance(Context context) {
@@ -57,268 +62,192 @@ public class MusicPlayer {
         return instance;
     }
 
+    // --- CÁC HÀM CƠ BẢN (GIỮ NGUYÊN) ---
+
     public void play(String uri) {
         try {
-            if (uri == null) {
-                Log.e(TAG, "URI is null, cannot play");
+            if (uri == null || uri.isEmpty()) {
+                Log.e(TAG, "URI is null/empty");
                 return;
             }
 
-            // Nếu đang chuẩn bị bài khác, bỏ qua
-            if (isPreparing) {
-                Log.d(TAG, "Already preparing another song, skipping...");
-                return;
-            }
+            if (isPreparing) return; // Đang load dở thì thôi
 
-            // Kiểm tra volume chỉ lần đầu
-            int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-            int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-
-            if (currentVolume == 0) {
-                // Tự động set volume về 50%
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume / 2, AudioManager.FLAG_SHOW_UI);
-            }
-
-            Log.d(TAG, "Attempting to play: " + uri);
-
+            // Nếu phát lại đúng bài đang hát thì bỏ qua (trừ khi đang pause thì không gọi play mà gọi resume)
             if (uri.equals(currentUri) && mediaPlayer.isPlaying()) {
-                Log.d(TAG, "Already playing this song");
                 return;
             }
 
-            isPreparing = true; // Đánh dấu đang chuẩn bị
             mediaPlayer.reset();
-
-            // Set lại audio attributes sau reset
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build();
-                mediaPlayer.setAudioAttributes(audioAttributes);
-            } else {
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            }
-
+            isPreparing = true;
+            isPrepared = false;
             currentUri = uri;
 
             Uri audioUri = Uri.parse(uri);
-            Log.d(TAG, "Setting data source: " + audioUri);
             mediaPlayer.setDataSource(ctx, audioUri);
 
-            // Dùng prepareAsync để không block UI thread
+            // Xử lý Volume
+            int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            if (currentVolume == 0) {
+                int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume / 3, 0);
+            }
+
+            // Cập nhật trạng thái lặp lại
+            mediaPlayer.setLooping(isRepeatEnabled);
+
             mediaPlayer.setOnPreparedListener(mp -> {
-                isPreparing = false; // Reset flag
-                Log.d(TAG, "MediaPlayer prepared, starting playback");
-                Log.d(TAG, "MediaPlayer duration: " + mp.getDuration() + "ms");
-                mp.setVolume(1.0f, 1.0f); // Set volume to max
+                isPreparing = false;
+                isPrepared = true;
                 mp.start();
-                Log.d(TAG, "MediaPlayer started. isPlaying: " + mp.isPlaying());
-                Toast.makeText(ctx, "🎵 Đang phát nhạc...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, "🎵 Đang phát: " + getSongTitle(uri), Toast.LENGTH_SHORT).show();
             });
 
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                isPreparing = false; // Reset flag khi có lỗi
-                String errorMsg = "Unknown error";
-                if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-                    errorMsg = "Media server died";
-                } else if (what == MediaPlayer.MEDIA_ERROR_UNKNOWN) {
-                    errorMsg = "Unknown media error";
-                }
-                Log.e(TAG, "MediaPlayer error - what: " + what + " (" + errorMsg + "), extra: " + extra);
-                // Chỉ hiện toast lỗi nghiêm trọng
-                if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-                    Toast.makeText(ctx, "❌ Lỗi phát nhạc nghiêm trọng", Toast.LENGTH_SHORT).show();
-                }
-                return true; // Đã xử lý lỗi
+                isPreparing = false;
+                Log.e(TAG, "MediaPlayer Error: " + what);
+                return true;
             });
 
+            // Xử lý khi hết bài
             mediaPlayer.setOnCompletionListener(mp -> {
-                Log.d(TAG, "Playback completed");
-                if (onCompletionListener != null) {
-                    onCompletionListener.onCompletion();
+                // Nếu đang Loop (Repeat One) thì MediaPlayer tự phát lại, không cần báo Next
+                if (!mediaPlayer.isLooping()) {
+                    notifyCompletion(); // Báo cho tất cả màn hình biết
                 }
             });
 
             mediaPlayer.prepareAsync();
-            Log.d(TAG, "PrepareAsync called");
 
-        } catch (IOException e) {
-            isPreparing = false;
-            Log.e(TAG, "IOException while playing music: " + e.getMessage(), e);
-            Toast.makeText(ctx, "❌ Không thể mở file nhạc", Toast.LENGTH_SHORT).show();
-        } catch (IllegalStateException e) {
-            isPreparing = false;
-            Log.e(TAG, "IllegalStateException: " + e.getMessage(), e);
-            // Không hiện toast vì thường tự recover được
         } catch (Exception e) {
             isPreparing = false;
-            Log.e(TAG, "Unexpected error: " + e.getMessage(), e);
+            Log.e(TAG, "Exception: " + e.getMessage());
+            Toast.makeText(ctx, "Lỗi phát nhạc", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void pause() {
-        try {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
-                Log.d(TAG, "Paused");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error pausing", e);
-        }
-    }
-
-    public void resume() {
-        try {
-            if (!mediaPlayer.isPlaying()) {
-                mediaPlayer.start();
-                Log.d(TAG, "Resumed");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error resuming", e);
-        }
-    }
+    public void pause() { if (mediaPlayer.isPlaying()) mediaPlayer.pause(); }
+    public void resume() { if (!mediaPlayer.isPlaying()) mediaPlayer.start(); }
 
     public void stop() {
-        try {
-            if (mediaPlayer.isPlaying()) mediaPlayer.stop();
-            mediaPlayer.reset();
-            currentUri = null;
-            Log.d(TAG, "Stopped");
-        } catch (Exception e) {
-            Log.e(TAG, "Error stopping", e);
-        }
+        if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+        mediaPlayer.reset();
+        currentUri = null;
+        isPreparing = false;
+        isPrepared = false;
+    }
+    public void release() {
+        mediaPlayer.release();
+        instance = null;
     }
 
-    public boolean isPlaying() {
-        return mediaPlayer != null && mediaPlayer.isPlaying();
-    }
-
-    public String getCurrentUri() {
-        return currentUri;
-    }
+    public boolean isPlaying() { return mediaPlayer.isPlaying(); }
+    public String getCurrentUri() { return currentUri; }
 
     public int getCurrentPosition() {
-        try {
-            if (mediaPlayer != null) {
-                return mediaPlayer.getCurrentPosition();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting current position", e);
-        }
-        return 0;
+        return (mediaPlayer != null && isPrepared) ? mediaPlayer.getCurrentPosition() : 0;
     }
 
     public int getDuration() {
-        try {
-            if (mediaPlayer != null) {
-                return mediaPlayer.getDuration();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting duration", e);
-        }
-        return 0;
+        return (mediaPlayer != null && isPrepared) ? mediaPlayer.getDuration() : 0;
     }
 
-    public void seekTo(int position) {
-        try {
-            if (mediaPlayer != null) {
-                mediaPlayer.seekTo(position);
-                Log.d(TAG, "Seeked to position: " + position);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error seeking", e);
+    public void seekTo(int position) { mediaPlayer.seekTo(position); }
+
+    // --- QUẢN LÝ LISTENER (NÂNG CẤP CHO MINIPLAYER) ---
+
+    public void addListener(OnCompletionListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
         }
     }
 
-    public void setRepeatEnabled(boolean repeatEnabled) {
-        isRepeatEnabled = repeatEnabled;
-        Log.d(TAG, "Repeat enabled: " + isRepeatEnabled);
+    public void removeListener(OnCompletionListener listener) {
+        listeners.remove(listener);
     }
 
-    public boolean isRepeatEnabled() {
-        return isRepeatEnabled;
-    }
-
+    // Hàm cũ (giữ lại để tương thích ngược, nhưng chuyển sang dùng list)
     public void setOnCompletionListener(OnCompletionListener listener) {
-        this.onCompletionListener = listener;
+        listeners.clear();
+        listeners.add(listener);
     }
 
-    public void setPlaylist(List<Song> playlist) {
-        this.playlist = playlist;
-        Log.d(TAG, "Playlist set with " + playlist.size() + " songs");
+    // Các hàm helper để thông báo cho TOÀN BỘ listener
+    private void notifyCompletion() {
+        for (OnCompletionListener listener : listeners) {
+            listener.onCompletion();
+        }
     }
+
+    private void notifyNextSong(Song song) {
+        for (OnCompletionListener listener : listeners) {
+            listener.onNextSong(song);
+        }
+    }
+
+    private void notifyPreviousSong(Song song) {
+        for (OnCompletionListener listener : listeners) {
+            listener.onPreviousSong(song);
+        }
+    }
+
+    // --- QUẢN LÝ PLAYLIST & LOGIC SHUFFLE/REPEAT ---
+
+    public void setPlaylist(List<Song> playlist) { this.playlist = playlist; }
 
     public void setPlaylist(List<Song> playlist, int currentIndex) {
         this.playlist = playlist;
         this.currentSongIndex = currentIndex;
-        Log.d(TAG, "Playlist set with " + playlist.size() + " songs, current index: " + currentIndex);
     }
 
+    public void setShuffleEnabled(boolean enabled) { this.isShuffleEnabled = enabled; }
+    public boolean isShuffleEnabled() { return isShuffleEnabled; }
+
+    public void setRepeatEnabled(boolean enabled) {
+        this.isRepeatEnabled = enabled;
+        if (mediaPlayer != null) {
+            mediaPlayer.setLooping(enabled);
+        }
+    }
+    public boolean isRepeatEnabled() { return isRepeatEnabled; }
+
     public void playNext() {
-        if (playlist == null || playlist.isEmpty()) {
-            Log.d(TAG, "❌ Playlist is empty, cannot play next");
-            Toast.makeText(ctx, "❌ Playlist trống!", Toast.LENGTH_SHORT).show();
-            return;
+        if (playlist == null || playlist.isEmpty()) return;
+
+        if (isShuffleEnabled && playlist.size() > 1) {
+            // Random bài khác bài hiện tại
+            int newIndex;
+            Random random = new Random();
+            do {
+                newIndex = random.nextInt(playlist.size());
+            } while (newIndex == currentSongIndex);
+            currentSongIndex = newIndex;
+        } else {
+            // Tăng dần
+            currentSongIndex++;
+            if (currentSongIndex >= playlist.size()) currentSongIndex = 0;
         }
 
-        Log.d(TAG, "🔵 playNext() called - Current index: " + currentSongIndex);
-        Log.d(TAG, "🔵 Playlist size: " + playlist.size());
-
-        // Chuyển sang bài tiếp theo
-        currentSongIndex++;
-
-        // Nếu vượt qua bài cuối cùng, quay về bài đầu tiên
-        if (currentSongIndex >= playlist.size()) {
-            currentSongIndex = 0;
-            Log.d(TAG, "🔁 Reached end of playlist, going back to first song");
-        }
-
-        Log.d(TAG, "▶️ Playing next song at index " + currentSongIndex);
-
-        Song nextSong = playlist.get(currentSongIndex);
-        Log.d(TAG, "🎵 Playing next song: " + nextSong.title + " (URI: " + nextSong.uri + ")");
-        play(nextSong.uri);
-
-        if (onCompletionListener != null) {
-            Log.d(TAG, "📢 Calling onNextSong callback");
-            onCompletionListener.onNextSong(nextSong);
-        }
+        playSongAtIndex(currentSongIndex, true);
     }
 
     public void playPrevious() {
-        if (playlist == null || playlist.isEmpty()) {
-            Log.d(TAG, "❌ Playlist is empty, cannot play previous");
-            Toast.makeText(ctx, "❌ Playlist trống!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (playlist == null || playlist.isEmpty()) return;
 
-        Log.d(TAG, "🔵 playPrevious() called - Current index: " + currentSongIndex);
-        Log.d(TAG, "🔵 Playlist size: " + playlist.size());
-
-        // Chuyển sang bài trước đó
         currentSongIndex--;
+        if (currentSongIndex < 0) currentSongIndex = playlist.size() - 1;
 
-        // Nếu lùi về trước bài đầu tiên, quay về bài cuối cùng
-        if (currentSongIndex < 0) {
-            currentSongIndex = playlist.size() - 1;
-            Log.d(TAG, "🔁 Reached beginning of playlist, going to last song");
-        }
-
-        Log.d(TAG, "▶️ Playing previous song at index " + currentSongIndex);
-
-        Song previousSong = playlist.get(currentSongIndex);
-        Log.d(TAG, "🎵 Playing previous song: " + previousSong.title + " (URI: " + previousSong.uri + ")");
-        play(previousSong.uri);
-
-        if (onCompletionListener != null) {
-            Log.d(TAG, "📢 Calling onPreviousSong callback");
-            onCompletionListener.onPreviousSong(previousSong);
-        }
+        playSongAtIndex(currentSongIndex, false);
     }
 
-    public int getCurrentSongIndex() {
-        return currentSongIndex;
+    private void playSongAtIndex(int index, boolean isNext) {
+        if (index < 0 || index >= playlist.size()) return;
+
+        Song song = playlist.get(index);
+        play(song.getAudioUrl());
+
+        if (isNext) notifyNextSong(song);
+        else notifyPreviousSong(song);
     }
 
     public Song getCurrentSong() {
@@ -328,7 +257,13 @@ public class MusicPlayer {
         return null;
     }
 
-    public void setCurrentSongIndex(int index) {
-        this.currentSongIndex = index;
+    public int getCurrentSongIndex() { return currentSongIndex; }
+    public void setCurrentSongIndex(int index) { this.currentSongIndex = index; }
+
+    private String getSongTitle(String uri) {
+        if (playlist != null && currentSongIndex >= 0 && currentSongIndex < playlist.size()) {
+            return playlist.get(currentSongIndex).getTitle();
+        }
+        return "bài hát";
     }
 }

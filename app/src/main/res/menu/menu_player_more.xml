@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_add_to_playlist"
+        android:title="Thêm vào Playlist"
+        android:icon="@android:drawable/ic_input_add" />
+
+    <item
+        android:id="@+id/action_download"
+        android:title="Tải xuống"
+        android:icon="@android:drawable/stat_sys_download" />
+
+    <item
+        android:id="@+id/action_share"
+        android:title="Chia sẻ bài hát"
+        android:icon="@android:drawable/ic_menu_share" />
+</menu>

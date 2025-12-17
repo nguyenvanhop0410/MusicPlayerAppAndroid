@@ -1,45 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/background_dark"
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/tv_user"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Not logged in"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="12dp" />
+        android:orientation="vertical"
+        android:paddingBottom="40dp">
 
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Login" />
+        <!-- 1. HEADER SECTION (Thông tin User + Thống kê) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_gradient_profile_header"
+            android:paddingTop="40dp"
+            android:paddingBottom="24dp">
+            <!-- Lưu ý: Nếu chưa có bg_gradient, bạn có thể dùng màu #2A2A2A -->
 
-    <Button
-        android:id="@+id/btn_register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Register"
-        android:layout_marginTop="8dp" />
+            <!-- Avatar -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/img_avatar"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_profile"
+                android:scaleType="centerCrop"
+                android:padding="2dp"
+                app:strokeColor="@color/accent_primary"
+                app:strokeWidth="2dp"
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_favorites"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Favorites: (empty)"
-        android:layout_marginTop="20dp" />
+            <!-- Tên & Email -->
+            <TextView
+                android:id="@+id/tv_display_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Name"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/img_avatar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_history"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="History: (empty)"
-        android:layout_marginTop="8dp" />
+            <TextView
+                android:id="@+id/tv_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="user@example.com"
+                android:textSize="14sp"
+                android:textColor="#B3B3B3"
+                app:layout_constraintTop_toBottomOf="@id/tv_display_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-</LinearLayout>
+            <!-- Thống kê (Stats) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_email">
 
+                <!-- Favorites -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingHorizontal="24dp">
+                    <TextView
+                        android:id="@+id/tv_favorites_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Favorites"
+                        android:textSize="12sp"
+                        android:textColor="#B3B3B3" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:background="#444444" />
+
+                <!-- Playlists -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingHorizontal="24dp">
+                    <TextView
+                        android:id="@+id/tv_playlists_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Playlists"
+                        android:textSize="12sp"
+                        android:textColor="#B3B3B3" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- 2. GENERAL SETTINGS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cài đặt chung"
+            android:textColor="#B3B3B3"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_rounded_card"
+            android:backgroundTint="#282828"
+            android:layout_marginHorizontal="16dp"
+            android:padding="4dp">
+
+            <!-- Edit Profile -->
+            <TextView
+                android:id="@+id/btn_edit_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chỉnh sửa hồ sơ"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:drawableStart="@android:drawable/ic_menu_edit"
+                android:drawablePadding="16dp"
+                android:drawableTint="@color/white"
+                android:gravity="center_vertical"
+                android:foreground="?attr/selectableItemBackground"/>
+
+        </LinearLayout>
+
+        <!-- 4. SUPPORT & INFO -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thông tin &amp; Hỗ trợ"
+            android:textColor="#B3B3B3"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_rounded_card"
+            android:backgroundTint="#282828"
+            android:layout_marginHorizontal="16dp"
+            android:padding="4dp">
+
+            <!-- Privacy Policy -->
+            <TextView
+                android:id="@+id/btn_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chính sách quyền riêng tư"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:drawableStart="@android:drawable/ic_menu_info_details"
+                android:drawablePadding="16dp"
+                android:drawableTint="@color/white"
+                android:gravity="center_vertical"
+                android:foreground="?attr/selectableItemBackground"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginHorizontal="16dp"/>
+
+            <!-- About Us -->
+            <TextView
+                android:id="@+id/btn_about"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Giới thiệu"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:drawableStart="@android:drawable/ic_menu_help"
+                android:drawablePadding="16dp"
+                android:drawableTint="@color/white"
+                android:gravity="center_vertical"
+                android:foreground="?attr/selectableItemBackground"/>
+        </LinearLayout>
+
+        <!-- 5. LOGOUT BUTTON -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="32dp"
+            android:text="Đăng xuất"
+            android:textColor="#FF5252"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:backgroundTint="#282828"
+            app:strokeColor="#FF5252"
+            app:strokeWidth="1dp"
+            app:cornerRadius="28dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Version 1.0.0"
+            android:textColor="#555555"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

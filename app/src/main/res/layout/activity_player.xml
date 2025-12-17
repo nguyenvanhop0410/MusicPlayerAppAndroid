@@ -1,226 +1,260 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:orientation="vertical"
+    android:background="@color/background_dark"
+    android:fitsSystemWindows="true"
+    android:id="@+id/player_root">
 
-    <!-- Header with Back Button and Menu -->
     <LinearLayout
-        android:id="@+id/header"
+        android:id="@+id/custom_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
+        android:background="@color/background_dark"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:paddingHorizontal="16dp">
 
+        <!-- Nút Back tự tạo -->
         <ImageButton
-            android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:id="@+id/btn_minimize"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:contentDescription="Back" />
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_minimize"
+            app:tint="@color/text_primary" />
 
-        <TextView
+        <View
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Now Playing"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"/>
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
+        <!-- Nút Menu bên phải -->
         <ImageButton
             android:id="@+id/btn_menu"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_more"
-            android:contentDescription="Menu" />
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_more"
+            app:tint="@color/text_primary" />
+
     </LinearLayout>
 
-    <!-- Album Art -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_album_art"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:layout_below="@id/header"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="8dp">
+    <!-- Nội dung cuộn -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-        <ImageView
-            android:id="@+id/player_album_art"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_music"
-            android:contentDescription="Album Art" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- Song Info -->
     <LinearLayout
-        android:id="@+id/song_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/card_album_art"
-        android:layout_marginTop="32dp"
         android:orientation="vertical"
-        android:paddingHorizontal="32dp">
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_album_art"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="320dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/surface_variant_dark">
+
+            <ImageView
+                android:id="@+id/player_album_art"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_music"
+                android:contentDescription="Album Art" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Song Title -->
         <TextView
             android:id="@+id/player_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Song Title"
-            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
             android:gravity="center"
-            android:maxLines="1"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:singleLine="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true" />
+            android:ellipsize="end"
+            android:maxLines="2" />
 
+        <!-- Song Artist -->
         <TextView
             android:id="@+id/player_artist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Artist Name"
+            android:textColor="@color/text_secondary"
             android:textSize="16sp"
-            android:textColor="#666666"
             android:gravity="center"
-            android:layout_marginTop="8dp" />
-    </LinearLayout>
+            android:layout_marginTop="8dp"
+            android:maxLines="1" />
 
-    <!-- Progress Bar and Time -->
-    <LinearLayout
-        android:id="@+id/progress_section"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/song_info"
-        android:layout_marginTop="32dp"
-        android:orientation="vertical"
-        android:paddingHorizontal="32dp">
-
-        <SeekBar
-            android:id="@+id/seek_bar"
+        <!-- Seekbar + time -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:progressTint="#FF6B6B"
-            android:thumbTint="#FF6B6B" />
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
 
+            <SeekBar
+                android:id="@+id/seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:progressBackgroundTint="@color/text_tertiary"
+                android:progressTint="@color/accent_primary"
+                android:thumbTint="@color/accent_primary" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/txt_current_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+                <TextView
+                    android:id="@+id/txt_total_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Next up -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="8dp">
 
             <TextView
-                android:id="@+id/txt_current_time"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="0:00"
-                android:textSize="12sp"
-                android:textColor="#999999" />
+                android:text="Next:"
+                android:textColor="@color/text_tertiary"
+                android:textSize="14sp" />
 
             <TextView
-                android:id="@+id/txt_total_time"
+                android:id="@+id/txt_next_song"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="0:00"
-                android:textSize="12sp"
-                android:textColor="#999999"
-                android:gravity="end" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Control Buttons -->
-    <LinearLayout
-        android:id="@+id/control_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/progress_section"
-        android:layout_marginTop="24dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingHorizontal="32dp">
-
-        <ImageButton
-            android:id="@+id/btn_previous"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/icon_previous"
-            android:scaleType="fitCenter"
-            android:contentDescription="Previous" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_marginHorizontal="24dp"
-            app:cardCornerRadius="40dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#FF6B6B">
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Next Song"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
 
             <ImageButton
-                android:id="@+id/btn_play_pause"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:id="@+id/btn_like"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_play"
-                android:scaleType="fitCenter"
-                android:contentDescription="Play/Pause" />
-        </androidx.cardview.widget.CardView>
+                android:contentDescription="Like"
+                android:src="@drawable/ic_heart"
+                app:tint="@color/text_primary" />
+        </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/btn_next"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_next"
-            android:scaleType="fitCenter"
-            android:contentDescription="next" />
+        <!-- Playback controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
+
+            <ImageButton
+                android:id="@+id/btn_shuffle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Shuffle/Repeat"
+                android:src="@drawable/ic_shuffle"
+                app:tint="@color/text_secondary" />
+
+            <ImageButton
+                android:id="@+id/btn_previous"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Previous"
+                android:src="@drawable/ic_previous"
+                app:tint="@color/text_primary" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="36dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/accent_primary">
+
+                <ImageButton
+                    android:id="@+id/btn_play"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Stop"
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="@color/white" />
+            </androidx.cardview.widget.CardView>
+
+            <ImageButton
+                android:id="@+id/btn_next"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_next"
+                app:tint="@color/text_primary" />
+
+            <ImageButton
+                android:id="@+id/btn_repeat"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Repeat"
+                android:src="@android:drawable/ic_popup_sync"
+                app:tint="@color/text_primary" />
+
+        </LinearLayout>
+
     </LinearLayout>
-
-    <!-- Additional Controls -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/control_buttons"
-        android:layout_marginTop="24dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingHorizontal="48dp">
-
-        <ImageButton
-            android:id="@+id/btn_repeat"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_repeat"
-            android:alpha="0.5"
-            android:contentDescription="Repeat" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <ImageButton
-            android:id="@+id/btn_stop"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="@color/red"
-            android:contentDescription="Stop and Exit" />
-    </LinearLayout>
-
-</RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

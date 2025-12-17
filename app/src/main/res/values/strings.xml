@@ -4,4 +4,12 @@
     <string name="nav_albums">Albums</string>
     <string name="nav_profile">Profile</string>
     <string name="music_player">Music Player</string>
+    <string name="privacy_policy_text">
+        Chính sách quyền riêng tư\n\n
+        1. Thu thập dữ liệu: Chúng tôi chỉ thu thập thông tin cơ bản để phục vụ trải nghiệm nghe nhạc.\n
+        2. Sử dụng thông tin: Thông tin của bạn được bảo mật và không chia sẻ với bên thứ ba.\n
+        3. Quyền của người dùng: Bạn có quyền yêu cầu xóa dữ liệu cá nhân bất cứ lúc nào.\n\n
+    </string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

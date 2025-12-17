@@ -1,29 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="#000000"
+    android:padding="24dp">
 
-    <EditText
-        android:id="@+id/et_email"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Email" />
+        android:text="Đăng Nhập"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="80dp" />
 
-    <EditText
-        android:id="@+id/et_password"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
+        android:text="Chào mừng trở lại!"
+        android:textColor="#B3B3B3"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp" />
 
-    <Button
-        android:id="@+id/btn_login_action"
-        android:layout_width="match_parent"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_email"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Login"
-        android:layout_marginTop="12dp" />
+        android:hint="Email"
+        app:hintTextColor="#FFFFFF"
+        app:boxStrokeColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/tv_subtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="48dp">
 
-</LinearLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B3B3B3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Mật khẩu"
+        app:hintTextColor="#FFFFFF"
+        app:boxStrokeColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/til_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B3B3B3" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_login_action"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="Đăng Nhập"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="28dp"
+        app:backgroundTint="#1DB954"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/til_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/tv_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chưa có tài khoản? Đăng ký"
+        android:textColor="#1DB954"
+        android:textSize="14sp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/btn_login_action"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/btn_login_action"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

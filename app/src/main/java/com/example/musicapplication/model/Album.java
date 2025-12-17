@@ -1,38 +1,60 @@
 package com.example.musicapplication.model;
 
-import androidx.annotation.NonNull;
+import java.io.Serializable;
 
-public class Album {
-    public long id;
-    public String title;
-    public String artist;
-    // Changed: use int resource id instead of URI string for drawable resources
-    public int artResId;
-    public String filterType; // "albumId" or "artist"
-    public String filterValue; // Album ID hoặc tên nghệ sĩ để lọc
+public class Album implements Serializable {
+    private String id;
+    private String title;       // Tên Album
+    private String artist;      // Tên Ca sĩ
+    private String coverUrl;    // Link ảnh online (Firebase)
+    private int artResId;       // ID ảnh nội bộ (R.drawable.xxx) - dùng cho demo offline
 
-    public Album(long id, String title, String artist) {
+    // Logic lọc bài hát
+    private String filterType;  // "album" hoặc "artist"
+    private String filterValue; // Giá trị để lọc
+
+    public Album() { }
+
+    // Constructor cho Online (Firebase)
+    public Album(String id, String title, String artist, String coverUrl) {
         this.id = id;
         this.title = title;
         this.artist = artist;
-        this.artResId = artResId;
-        this.filterType = "albumId"; // Mặc định lọc theo albumId
-        this.filterValue = String.valueOf(id);
+        this.coverUrl = coverUrl;
+        this.artResId = 0; // Không dùng
+        this.filterType = "album";
+        this.filterValue = title; // Mặc định lọc theo tên album
     }
 
-    // Constructor mới: cho phép lọc theo nghệ sĩ
-    public Album(String title, String artistName, int artResId, String filterType, String filterValue) {
-        this.id = 0; // không cần id khi lọc theo nghệ sĩ
+    // Constructor cho Offline (Local Resource) - Code của bạn
+    public Album(String title, String artist, int artResId, String filterType, String filterValue) {
         this.title = title;
-        this.artist = artistName;
+        this.artist = artist;
         this.artResId = artResId;
         this.filterType = filterType;
         this.filterValue = filterValue;
+        this.coverUrl = ""; // Không có link online
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return title + (artist != null && !artist.isEmpty() ? " - " + artist : "");
-    }
+    // --- GETTER & SETTER ---
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getArtist() { return artist; }
+    public void setArtist(String artist) { this.artist = artist; }
+
+    public String getCoverUrl() { return coverUrl; }
+    public void setCoverUrl(String coverUrl) { this.coverUrl = coverUrl; }
+
+    public int getArtResId() { return artResId; }
+    public void setArtResId(int artResId) { this.artResId = artResId; }
+
+    public String getFilterType() { return filterType; }
+    public void setFilterType(String filterType) { this.filterType = filterType; }
+
+    public String getFilterValue() { return filterValue; }
+    public void setFilterValue(String filterValue) { this.filterValue = filterValue; }
 }

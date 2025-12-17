@@ -1,8 +1,26 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme - Dark Mode -->
     <style name="Base.Theme.MusicApplication" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/accent_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Navigation bar -->
+        <item name="android:navigationBarColor">@color/background_dark</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 
     <style name="Theme.MusicApplication" parent="Base.Theme.MusicApplication" />

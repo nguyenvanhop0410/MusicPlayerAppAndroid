@@ -1,6 +1,6 @@
 package com.example.musicapplication.player;
 
-import com.example.musicapplication.model.Song;
+import com.example.musicapplication.domain.model.Song;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class PlaylistManager {
     public void setPlaylist(List<Song> songs) {
         this.playlist = new ArrayList<>(songs);
         this.currentPosition = 0;
-        android.util.Log.d("PlaylistManager", "✅ Playlist set: " + songs.size() + " songs");
+        android.util.Log.d("PlaylistManager", "Playlist set: " + songs.size() + " songs");
         // Log all songs
         for (int i = 0; i < songs.size(); i++) {
             android.util.Log.d("PlaylistManager", "  [" + i + "] " + songs.get(i).title);
@@ -34,7 +34,7 @@ public class PlaylistManager {
     public void setPlaylist(List<Song> songs, int position) {
         this.playlist = new ArrayList<>(songs);
         this.currentPosition = position;
-        android.util.Log.d("PlaylistManager", "✅ Playlist set: " + songs.size() + " songs, starting at position: " + position);
+        android.util.Log.d("PlaylistManager", "Playlist set: " + songs.size() + " songs, starting at position: " + position);
         // Log all songs
         for (int i = 0; i < songs.size(); i++) {
             android.util.Log.d("PlaylistManager", "  [" + i + "] " + songs.get(i).title);
@@ -42,7 +42,7 @@ public class PlaylistManager {
     }
 
     public List<Song> getPlaylist() {
-        android.util.Log.d("PlaylistManager", "📋 Getting playlist, size: " + playlist.size());
+        android.util.Log.d("PlaylistManager", "Getting playlist, size: " + playlist.size());
         return playlist;
     }
 

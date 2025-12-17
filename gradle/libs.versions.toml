@@ -8,6 +8,24 @@ material = "1.13.0"
 activity = "1.11.0"
 constraintlayout = "2.2.1"
 cardview = "1.0.0"
+# Firebase
+firebaseBom = "32.7.0"
+# Architecture Components
+lifecycle = "2.7.0"
+room = "2.6.1"
+# Hilt
+hilt = "2.48"
+# ExoPlayer
+media3 = "1.2.0"
+# Retrofit
+retrofit = "2.9.0"
+gson = "2.10.1"
+# Navigation
+navigation = "2.7.6"
+# Coroutines
+coroutines = "1.7.3"
+# Glide
+glide = "4.16.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -18,6 +36,36 @@ material = { group = "com.google.android.material", name = "material", version.r
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+# Firebase
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+# Architecture Components (Java versions - not used directly, using explicit versions in build.gradle)
+# lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycle" }
+# lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata", version.ref = "lifecycle" }
+# lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycle" }
+# Room
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+# Hilt
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+# ExoPlayer
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
+# Retrofit
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+# Navigation (Java versions - not used directly, using explicit versions in build.gradle)
+# navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigation" }
+# navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigation" }
+# Glide
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.0" }

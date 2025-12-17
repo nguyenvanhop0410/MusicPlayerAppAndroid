@@ -1,107 +1,84 @@
 package com.example.musicapplication.adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.musicapplication.R;
-import com.example.musicapplication.main.SongListFragment;
 import com.example.musicapplication.model.Album;
 
 import java.util.List;
 
-public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> {
-    private final List<Album> albums;
-    private final Context context;
+public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
 
-    public AlbumAdapter(Context context, List<Album> albums) {
+    private Context context;
+    private List<Album> albumList;
+    private OnAlbumClickListener listener;
+
+    public interface OnAlbumClickListener {
+        void onAlbumClick(Album album);
+    }
+
+    public AlbumAdapter(Context context, List<Album> albumList, OnAlbumClickListener listener) {
         this.context = context;
-        this.albums = albums;
+        this.albumList = albumList;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album, parent, false);
-        return new ViewHolder(v);
+    public AlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.item_album, parent, false);
+        return new AlbumViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Album a = albums.get(position);
-        holder.title.setText(a.title);
-        holder.artist.setText(a.artist != null ? a.artist : "Unknown");
+    public void onBindViewHolder(@NonNull AlbumViewHolder holder, int position) {
+        Album album = albumList.get(position);
 
-        // Load image using resource id directly with Glide
-        if (a.artResId != 0) {
+        holder.tvName.setText(album.getTitle());
+        holder.tvArtist.setText(album.getArtist());
+
+        // LOGIC HIỂN THỊ ẢNH THÔNG MINH
+        if (album.getCoverUrl() != null && !album.getCoverUrl().isEmpty()) {
+            // Trường hợp 1: Có link Online -> Dùng Glide tải
             Glide.with(context)
-                    .load(a.artResId)
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .error(R.drawable.ic_launcher_foreground)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(holder.image);
-        } else if (a.id > 0) {
-            // Fallback: try MediaStore album art URI if we have an album id
-            try {
-                Uri albumArtUri = Uri.parse("content://media/external/audio/albumart/" + a.id);
-                Glide.with(context)
-                        .load(albumArtUri)
-                        .placeholder(R.drawable.ic_launcher_foreground)
-                        .error(R.drawable.ic_launcher_foreground)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(holder.image);
-            } catch (Exception ignored) {
-                holder.image.setImageResource(R.drawable.ic_launcher_foreground);
-            }
+                    .load(album.getCoverUrl())
+                    .placeholder(R.drawable.ic_music)
+                    .centerCrop()
+                    .into(holder.imgCover);
+        } else if (album.getArtResId() != 0) {
+            // Trường hợp 2: Có ảnh Offline (Resource ID) -> Set trực tiếp
+            holder.imgCover.setImageResource(album.getArtResId());
         } else {
-            holder.image.setImageResource(R.drawable.ic_launcher_foreground);
+            // Trường hợp 3: Không có gì -> Hiện ảnh mặc định
+            holder.imgCover.setImageResource(R.drawable.ic_music);
         }
 
-        holder.itemView.setOnClickListener(v -> {
-            // Switch to Songs tab with album filter
-            if (context instanceof com.example.musicapplication.main.MainActivity) {
-                com.example.musicapplication.main.MainActivity mainActivity =
-                        (com.example.musicapplication.main.MainActivity) context;
-
-                // Kiểm tra loại filter
-                if ("artist".equals(a.filterType)) {
-                    // Lọc theo nghệ sĩ
-                    mainActivity.switchToSongsWithArtistFilter(a.filterValue, a.title);
-                    Toast.makeText(context, "Đang tải bài hát của: " + a.filterValue, Toast.LENGTH_SHORT).show();
-                } else {
-                    // Lọc theo albumId (mặc định)
-                    mainActivity.switchToSongsWithAlbumFilter(a.id, a.title);
-                    Toast.makeText(context, "Đang tải bài hát trong album: " + a.title, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        holder.itemView.setOnClickListener(v -> listener.onAlbumClick(album));
     }
 
     @Override
     public int getItemCount() {
-        return albums.size();
+        return albumList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title, artist;
-        ImageView image;
+    public static class AlbumViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgCover;
+        TextView tvName, tvArtist;
 
-        ViewHolder(@NonNull View itemView) {
+        public AlbumViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.item_album_title);
-            artist = itemView.findViewById(R.id.item_album_artist);
-            image = itemView.findViewById(R.id.imageView3);
+            imgCover = itemView.findViewById(R.id.img_album_cover);
+            tvName = itemView.findViewById(R.id.tv_album_name);
+            tvArtist = itemView.findViewById(R.id.tv_album_artist);
         }
     }
 }

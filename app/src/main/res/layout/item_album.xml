@@ -1,59 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp"
-    android:background="?attr/selectableItemBackground">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#2A2A2A"> <!-- Thêm màu nền để dễ nhìn thấy thẻ nếu ảnh lỗi -->
 
-    <!-- Album artwork - optimized size for grid display -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp">
-
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:contentDescription="Album Art"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- Album info container -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="8dp">
+        android:orientation="vertical">
 
-        <!-- Album Title (bold, larger) -->
-        <TextView
-            android:id="@+id/item_album_title"
+        <!-- ẢNH BÌA: Phải có chiều cao cố định -->
+        <ImageView
+            android:id="@+id/img_album_cover"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_music"
+            android:background="#444444"/> <!-- Màu nền placeholder -->
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:maxLines="1"
-            android:ellipsize="end"
-            tools:text="Album name" />
+            android:orientation="vertical"
+            android:padding="10dp">
 
-        <!-- Artist name (smaller, gray) -->
-        <TextView
-            android:id="@+id/item_album_artist"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="2dp"
-            android:textColor="#666666"
-            android:textSize="12sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            tools:text="Artist A" />
+            <TextView
+                android:id="@+id/tv_album_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Album Name"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tv_album_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Artist"
+                android:textColor="#B0B0B0"
+                android:textSize="12sp"
+                android:ellipsize="end"
+                android:maxLines="1" />
+        </LinearLayout>
     </LinearLayout>
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -25,9 +25,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+
 import com.example.musicapplication.R;
 import com.example.musicapplication.adapter.SongAdapter;
-import com.example.musicapplication.model.Song;
+import com.example.musicapplication.domain.model.Song;
+import com.example.musicapplication.data.repository.SongRepository;
+import com.example.musicapplication.data.repository.AuthRepository;
+import com.example.musicapplication.main.PlayerActivity;
+import com.example.musicapplication.player.PlaylistManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +54,10 @@ public class SongsFragment extends Fragment {
     private List<Song> allSongs = new ArrayList<>();
     private SongAdapter songAdapter;
     private boolean isFilterAppliedFromAlbum = false; // Track if filter came from album click
+    
+    // Firebase repositories
+    private SongRepository songRepository;
+    private AuthRepository authRepository;
 
     @Nullable
     @Override
@@ -63,7 +73,11 @@ public class SongsFragment extends Fragment {
 
         btnRefresh = view.findViewById(R.id.btn_refresh_songs);
         btnRefresh.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Đang quét file nhạc...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Đang tải lại danh sách nhạc...", Toast.LENGTH_SHORT).show();
+            // Reload both Firebase and local songs
+            if (authRepository.isLoggedIn()) {
+                loadSongsFromFirebase();
+            }
             scanMediaFiles();
         });
 
@@ -77,6 +91,15 @@ public class SongsFragment extends Fragment {
             Toast.makeText(getContext(), "Đã hiển thị tất cả bài hát", Toast.LENGTH_SHORT).show();
         });
 
+        // Initialize Firebase repositories
+        songRepository = new SongRepository(requireContext());
+        authRepository = new AuthRepository(requireContext());
+        
+        // Load songs from Firebase if user is logged in
+        if (authRepository.isLoggedIn()) {
+            loadSongsFromFirebase();
+        }
+        
         if (!hasPermission()) {
             requestPermission();
         } else {
@@ -149,6 +172,95 @@ public class SongsFragment extends Fragment {
         }
     }
 
+    private void loadSongsFromFirebase() {
+        if (songRepository == null) {
+            songRepository = new SongRepository(requireContext());
+        }
+        
+        songRepository.getAllSongs(new SongRepository.OnResultListener<List<Song>>() {
+            @Override
+            public void onSuccess(List<Song> firebaseSongs) {
+                Log.d(TAG, "Loaded " + firebaseSongs.size() + " songs from Firebase");
+                
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        // Merge Firebase songs with local songs
+                        mergeSongs(firebaseSongs);
+                    });
+                }
+            }
+            
+            @Override
+            public void onError(Exception error) {
+                Log.e(TAG, "Error loading songs from Firebase: " + error.getMessage());
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Không thể tải nhạc từ Firebase: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
+    }
+    
+    private void mergeSongs(List<Song> firebaseSongs) {
+        // Create a new list starting with Firebase songs
+        List<Song> mergedSongs = new ArrayList<>(firebaseSongs);
+        
+        // Add local songs that are not duplicates (check by title and artist)
+        for (Song localSong : allSongs) {
+            if (localSong.isLocal()) { // Only add local songs
+                boolean isDuplicate = false;
+                for (Song firebaseSong : firebaseSongs) {
+                    if (localSong.getTitle() != null && firebaseSong.getTitle() != null &&
+                        localSong.getTitle().equalsIgnoreCase(firebaseSong.getTitle()) &&
+                        localSong.getArtist() != null && firebaseSong.getArtist() != null &&
+                        localSong.getArtist().equalsIgnoreCase(firebaseSong.getArtist())) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                if (!isDuplicate) {
+                    mergedSongs.add(localSong);
+                }
+            }
+        }
+        
+        allSongs = mergedSongs;
+        refreshSongList();
+        
+        int totalCount = allSongs.size();
+        int firebaseCount = firebaseSongs.size();
+        int localCount = totalCount - firebaseCount;
+        
+        Log.d(TAG, "Merged songs: " + totalCount + " total (" + firebaseCount + " from Firebase, " + localCount + " local)");
+        
+        if (totalCount > 0) {
+            Toast.makeText(getContext(), 
+                "Đã tải " + totalCount + " bài hát (" + firebaseCount + " từ Firebase, " + localCount + " local)", 
+                Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void mergeSongsWithLocal(List<Song> localSongs) {
+        // Add local songs that are not duplicates
+        for (Song localSong : localSongs) {
+            boolean isDuplicate = false;
+            for (Song existingSong : allSongs) {
+                if (existingSong.isOnline() && 
+                    localSong.getTitle() != null && existingSong.getTitle() != null &&
+                    localSong.getTitle().equalsIgnoreCase(existingSong.getTitle()) &&
+                    localSong.getArtist() != null && existingSong.getArtist() != null &&
+                    localSong.getArtist().equalsIgnoreCase(existingSong.getArtist())) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            if (!isDuplicate) {
+                allSongs.add(localSong);
+            }
+        }
+    }
+
     private void scanMediaFiles() {
         String[] paths = {
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(),
@@ -160,7 +272,13 @@ public class SongsFragment extends Fragment {
         MediaScannerConnection.scanFile(getContext(), paths, null, (path, uri) -> {
             Log.d(TAG, "Scanned: " + path + " -> " + uri);
             if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> loadSongs());
+                getActivity().runOnUiThread(() -> {
+                    loadSongs();
+                    // After loading local songs, merge with Firebase songs if available
+                    if (authRepository != null && authRepository.isLoggedIn() && songRepository != null) {
+                        loadSongsFromFirebase();
+                    }
+                });
             }
         });
     }
@@ -218,15 +336,22 @@ public class SongsFragment extends Fragment {
             final int songCount = songs.size();
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    // Store all songs
-                    allSongs = songs;
+                    // Store local songs separately
+                    List<Song> localSongs = songs;
+                    
+                    // If we have Firebase songs, merge them; otherwise just use local songs
+                    if (allSongs.isEmpty() || !authRepository.isLoggedIn()) {
+                        allSongs = localSongs;
+                    } else {
+                        // Merge local songs with existing Firebase songs
+                        mergeSongsWithLocal(localSongs);
+                    }
 
-                    if (songCount == 0) {
+                    if (songCount == 0 && (allSongs.isEmpty() || !authRepository.isLoggedIn())) {
                         Toast.makeText(getContext(), "Không tìm thấy bài hát!\nHãy thêm file MP3 vào Download/Music và nhấn 'Quét lại'", Toast.LENGTH_LONG).show();
                         Log.w(TAG, "No songs loaded - MediaStore is empty");
-                    } else {
-                        Toast.makeText(getContext(), "Tìm thấy " + songCount + " bài hát", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "Successfully loaded " + songCount + " songs");
+                    } else if (songCount > 0) {
+                        Log.d(TAG, "Successfully loaded " + songCount + " local songs");
                     }
 
                     // Apply filter if exists
@@ -237,40 +362,63 @@ public class SongsFragment extends Fragment {
     }
 
     private void refreshSongList() {
+        List<Song> songsToShow;
+        
         if (filterAlbumId != null) {
             // Filter songs by album
-            List<Song> filteredSongs = new ArrayList<>();
+            songsToShow = new ArrayList<>();
             for (Song song : allSongs) {
                 if (song.getAlbumId() == filterAlbumId) {
-                    filteredSongs.add(song);
+                    songsToShow.add(song);
                 }
             }
-
-            songAdapter = new SongAdapter(getContext(), filteredSongs);
-            recyclerView.setAdapter(songAdapter);
-
-            Toast.makeText(getContext(), "Tìm thấy " + filteredSongs.size() + " bài hát trong album này", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Filtered songs by albumId=" + filterAlbumId + ", count: " + filteredSongs.size());
+            Toast.makeText(getContext(), "Tìm thấy " + songsToShow.size() + " bài hát trong album này", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Filtered songs by albumId=" + filterAlbumId + ", count: " + songsToShow.size());
         } else if (filterArtistName != null) {
             // Filter songs by artist
-            List<Song> filteredSongs = new ArrayList<>();
+            songsToShow = new ArrayList<>();
             for (Song song : allSongs) {
                 if (song.getArtist().equalsIgnoreCase(filterArtistName)) {
-                    filteredSongs.add(song);
+                    songsToShow.add(song);
                 }
             }
-
-            songAdapter = new SongAdapter(getContext(), filteredSongs);
-            recyclerView.setAdapter(songAdapter);
-
-            Toast.makeText(getContext(), "Tìm thấy " + filteredSongs.size() + " bài hát của nghệ sĩ này", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Filtered songs by artist=" + filterArtistName + ", count: " + filteredSongs.size());
+            Toast.makeText(getContext(), "Tìm thấy " + songsToShow.size() + " bài hát của nghệ sĩ này", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Filtered songs by artist=" + filterArtistName + ", count: " + songsToShow.size());
         } else {
             // Show all songs
-            songAdapter = new SongAdapter(getContext(), allSongs);
-            recyclerView.setAdapter(songAdapter);
+            songsToShow = allSongs;
             Log.d(TAG, "Showing all songs, count: " + allSongs.size());
         }
+        
+        // Create adapter with click listener
+        songAdapter = new SongAdapter(getContext(), songsToShow, this::onSongClick);
+        recyclerView.setAdapter(songAdapter);
+    }
+    
+    private void onSongClick(Song song, int position, List<Song> playlist) {
+        // Set playlist to PlaylistManager
+        PlaylistManager.getInstance().setPlaylist(playlist, position);
+        
+        // Increment play count if online song
+        if (song.isOnline() && song.getId() != null && songRepository != null) {
+            songRepository.incrementPlayCount(song.getId());
+        }
+        
+        // Open player activity
+        Intent intent = new Intent(getContext(), PlayerActivity.class);
+        intent.putExtra("songId", song.getId());
+        intent.putExtra("title", song.getTitle());
+        intent.putExtra("artist", song.getArtist());
+        intent.putExtra("imageUrl", song.getImageUrl());
+        intent.putExtra("audioUrl", song.getAudioUrl());
+        intent.putExtra("uri", song.getPlaybackUrl());
+        intent.putExtra("songIndex", position);
+        intent.putExtra("playlistSize", playlist.size());
+        intent.putExtra("isOnline", song.isOnline());
+        if (song.getAlbumId() > 0) {
+            intent.putExtra("albumId", song.getAlbumId());
+        }
+        startActivity(intent);
     }
 
     @Override
