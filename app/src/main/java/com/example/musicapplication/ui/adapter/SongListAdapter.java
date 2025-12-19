@@ -9,13 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.musicapplication.R;
 import com.example.musicapplication.model.Song;
+import com.example.musicapplication.utils.ImageLoader;
 
 import java.util.List;
 import java.util.Locale;
@@ -63,11 +59,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongRo
         holder.tvPlayCount.setText(formatPlayCount(song.getPlayCount()));
 
         if (song.getImageUrl() != null && !song.getImageUrl().isEmpty()) {
-            Glide.with(context)
-                    .load(song.getImageUrl())
-                    .apply(new RequestOptions().placeholder(R.drawable.ic_music).error(R.drawable.ic_music))
-                    .transform(new CenterCrop(), new RoundedCorners(16))
-                    .into(holder.imgSong);
+            ImageLoader.loadRounded(context, song.getImageUrl(), holder.imgSong, 10);
         } else {
             holder.imgSong.setImageResource(R.drawable.ic_music);
         }

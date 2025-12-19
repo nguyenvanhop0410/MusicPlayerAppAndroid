@@ -3,7 +3,6 @@ package com.example.musicapplication.ui.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.bumptech.glide.Glide;
 import com.example.musicapplication.R;
 import com.example.musicapplication.ui.adapter.AlbumAdapter;
 import com.example.musicapplication.ui.adapter.SliderAdapter;
@@ -40,6 +38,8 @@ import com.example.musicapplication.model.SliderItem;
 import com.example.musicapplication.model.Song;
 import com.example.musicapplication.player.MusicPlayer;
 import com.example.musicapplication.player.PlaylistManager;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.Logger;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -146,18 +146,13 @@ public class HomeFragment extends Fragment {
                 public void onSuccess(User user) {
                     if (getActivity() != null && user != null && user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
                         getActivity().runOnUiThread(() -> {
-                            Glide.with(HomeFragment.this)
-                                    .load(user.getPhotoUrl())
-                                    .placeholder(R.drawable.ic_profile)
-                                    .error(R.drawable.ic_profile)
-                                    .circleCrop()
-                                    .into(imgProfile);
+                            ImageLoader.loadCircle(getContext(), user.getPhotoUrl(), imgProfile);
                         });
                     }
                 }
                 @Override
                 public void onError(Exception error) {
-                    Log.e("HomeFragment", "Error loading user profile", error);
+                    Logger.e("Error loading user profile", error);
                 }
             });
         } else {

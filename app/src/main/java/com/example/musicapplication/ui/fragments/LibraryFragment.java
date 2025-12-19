@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +13,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.musicapplication.R;
 import com.example.musicapplication.ui.adapter.PlaylistAdapter;
 import com.example.musicapplication.ui.adapter.SongListAdapter;
@@ -39,6 +35,9 @@ import com.example.musicapplication.model.Playlist;
 import com.example.musicapplication.player.MusicPlayer;
 import com.example.musicapplication.player.PlaylistManager;
 import com.example.musicapplication.ui.activity.upload.UploadSongActivity;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.ToastUtils;
+import com.example.musicapplication.utils.Logger;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,8 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LibraryFragment extends Fragment {
-
-    private static final String TAG = "LibraryFragment";
 
     // UI Components
     private RecyclerView recyclerPlaylists, recyclerLiked, recyclerHistory;
@@ -129,18 +126,13 @@ public class LibraryFragment extends Fragment {
                 public void onSuccess(User user) {
                     if (getActivity() != null && user != null && user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
                         getActivity().runOnUiThread(() -> {
-                            Glide.with(LibraryFragment.this)
-                                    .load(user.getPhotoUrl())
-                                    .placeholder(R.drawable.ic_profile)
-                                    .error(R.drawable.ic_profile)
-                                    .circleCrop()
-                                    .into(imgProfile);
+                            ImageLoader.loadCircle(getContext(), user.getPhotoUrl(), imgProfile);
                         });
                     }
                 }
                 @Override
                 public void onError(Exception error) {
-                    Log.e("HomeFragment", "Error loading user profile", error);
+                    Logger.e("Error loading user profile", error);
                 }
             });
         } else {
@@ -213,7 +205,7 @@ public class LibraryFragment extends Fragment {
             @Override
             public void onSuccess(List<Playlist> result) {
                 // Log để kiểm tra dữ liệu có về không
-                Log.d(TAG, "Playlists loaded: " + result.size());
+                Logger.d("Playlists loaded: " + result.size());
 
                 allPlaylists.clear();
                 allPlaylists.addAll(result);
@@ -225,7 +217,7 @@ public class LibraryFragment extends Fragment {
             }
             @Override
             public void onError(Exception e) {
-                Log.e(TAG, "Error loading playlists", e);
+                Logger.e("Error loading playlists", e);
                 setLoading(false);
             }
         });
@@ -238,7 +230,7 @@ public class LibraryFragment extends Fragment {
                 allLikedSongs.addAll(result);
                 refreshDisplayLists();
             }
-            @Override public void onError(Exception e) { Log.e(TAG, "Error loading liked songs", e); }
+            @Override public void onError(Exception e) { Logger.e("Error loading liked songs", e); }
         });
 
         // 3. Listen History (Từ HistoryRepository)
@@ -249,7 +241,7 @@ public class LibraryFragment extends Fragment {
                 allHistorySongs.addAll(result);
                 refreshDisplayLists();
             }
-            @Override public void onError(Exception e) { Log.e(TAG, "Error loading history", e); }
+            @Override public void onError(Exception e) { Logger.e("Error loading history", e); }
         });
     }
 
@@ -267,7 +259,7 @@ public class LibraryFragment extends Fragment {
 
     private void showClearHistoryConfirmation() {
         if (allHistorySongs.isEmpty()) {
-            Toast.makeText(getContext(), "Lịch sử đang trống!", Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(getContext(), "Lịch sử đang trống!");
             return;
         }
 
@@ -295,11 +287,11 @@ public class LibraryFragment extends Fragment {
                 playlistRepository.createPlaylist(name, new PlaylistRepository.OnResultListener<String>() {
                     @Override
                     public void onSuccess(String result) {
-                        Toast.makeText(getContext(), "Đã tạo Playlist!", Toast.LENGTH_SHORT).show();
+                        ToastUtils.showSuccess(getContext(), "Đã tạo Playlist!");
                     }
                     @Override
                     public void onError(Exception e) {
-                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        ToastUtils.showError(getContext(), "Failed: " + e.getMessage());
                     }
                 });
             }

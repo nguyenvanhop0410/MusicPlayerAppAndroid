@@ -5,14 +5,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -32,6 +29,8 @@ import com.example.musicapplication.model.Genre;
 import com.example.musicapplication.player.MusicPlayer;
 import com.example.musicapplication.player.PlaylistManager;
 import com.google.android.material.textfield.TextInputEditText;
+import com.example.musicapplication.utils.ToastUtils;
+import com.example.musicapplication.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +95,7 @@ public class SearchFragment extends Fragment {
                 recyclerSearchResults.setAdapter(searchResultAdapter);
             }
         } catch (Exception e) {
-            Log.e("SearchFragment", "Error initializing views: " + e.getMessage());
+            Logger.e("Error initializing views: " + e.getMessage());
         }
     }
 
@@ -166,7 +165,7 @@ public class SearchFragment extends Fragment {
     private void onSongClick(Song song, int position, List<Song> playlist) {
         try {
             if (getContext() == null || song == null) {
-                Log.e("SearchFragment", "Context or song is null");
+                Logger.e("Context or song is null");
                 return;
             }
 
@@ -187,8 +186,8 @@ public class SearchFragment extends Fragment {
             intent.putExtra("isOnline", song.isOnline());
             startActivity(intent);
         } catch (Exception e) {
-            Log.e("SearchFragment", "Error handling song click: " + e.getMessage());
-            Toast.makeText(getContext(), "Error playing song", Toast.LENGTH_SHORT).show();
+            Logger.e("Error handling song click: " + e.getMessage());
+            ToastUtils.showError(getContext(), "Error playing song");
         }
     }
 }

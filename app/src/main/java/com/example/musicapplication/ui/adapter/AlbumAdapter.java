@@ -10,9 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.musicapplication.R;
 import com.example.musicapplication.model.Album;
+import com.example.musicapplication.utils.ImageLoader;
 
 import java.util.List;
 
@@ -49,11 +49,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
         // LOGIC HIỂN THỊ ẢNH THÔNG MINH
         if (album.getCoverUrl() != null && !album.getCoverUrl().isEmpty()) {
             // Trường hợp 1: Có link Online -> Dùng Glide tải
-            Glide.with(context)
-                    .load(album.getCoverUrl())
-                    .placeholder(R.drawable.ic_music)
-                    .centerCrop()
-                    .into(holder.imgCover);
+            ImageLoader.load(context, album.getCoverUrl(), holder.imgCover);
         } else if (album.getArtResId() != 0) {
             // Trường hợp 2: Có ảnh Offline (Resource ID) -> Set trực tiếp
             holder.imgCover.setImageResource(album.getArtResId());

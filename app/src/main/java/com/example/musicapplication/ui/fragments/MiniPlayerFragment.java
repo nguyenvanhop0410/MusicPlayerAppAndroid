@@ -13,11 +13,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
+
 import com.example.musicapplication.R;
 import com.example.musicapplication.model.Song;
 import com.example.musicapplication.ui.activity.player.PlayerActivity;
 import com.example.musicapplication.player.MusicPlayer;
+import com.example.musicapplication.utils.ImageLoader;
 
 public class MiniPlayerFragment extends Fragment implements MusicPlayer.OnCompletionListener {
 
@@ -122,7 +123,7 @@ public class MiniPlayerFragment extends Fragment implements MusicPlayer.OnComple
         // Load ảnh
         if (getContext() != null) {
             if (currentSong.isOnline() && currentSong.getImageUrl() != null) {
-                Glide.with(getContext()).load(currentSong.getImageUrl()).placeholder(R.drawable.ic_music).into(imgAlbumArt);
+                ImageLoader.load(getContext(), currentSong.getImageUrl(), imgAlbumArt);
             } else {
                 imgAlbumArt.setImageResource(R.drawable.ic_music);
             }

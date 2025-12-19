@@ -21,16 +21,10 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.musicapplication.R;
 import com.example.musicapplication.data.repository.FavoriteRepository;
 import com.example.musicapplication.data.repository.HistoryRepository;
@@ -40,6 +34,10 @@ import com.example.musicapplication.model.Song;
 import com.example.musicapplication.model.Playlist; // Import Playlist Model
 import com.example.musicapplication.player.MusicPlayer;
 import com.example.musicapplication.player.PlaylistManager;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.ToastUtils;
+import com.example.musicapplication.utils.TimeFormatter;
+import com.example.musicapplication.utils.Logger;
 import com.google.firebase.firestore.ListenerRegistration; // Import ListenerRegistration
 
 import java.util.ArrayList;
@@ -175,7 +173,7 @@ public class PlayerActivity extends AppCompatActivity {
                 historyRepository.addToHistory(currentSongId, null);
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, e.getMessage());
         }
     }
 
@@ -216,7 +214,7 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception error) {
-                Toast.makeText(PlayerActivity.this, "Lỗi kết nối!", Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(PlayerActivity.this, "Lỗi kết nối!");
             }
         });
     }
@@ -259,14 +257,14 @@ public class PlayerActivity extends AppCompatActivity {
             boolean newState = !player.isShuffleEnabled();
             player.setShuffleEnabled(newState);
             updateShuffleRepeatUI();
-            Toast.makeText(this, newState ? "Trộn bài: BẬT" : "Trộn bài: TẮT", Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, newState ? "Trộn bài: BẬT" : "Trộn bài: TẮT");
         });
 
         btnRepeat.setOnClickListener(v -> {
             boolean newState = !player.isRepeatEnabled();
             player.setRepeatEnabled(newState);
             updateShuffleRepeatUI();
-            Toast.makeText(this, newState ? "Lặp lại: BẬT" : "Lặp lại: TẮT", Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, newState ? "Lặp lại: BẬT" : "Lặp lại: TẮT");
         });
 
         btnLike.setOnClickListener(v -> {
@@ -281,7 +279,7 @@ public class PlayerActivity extends AppCompatActivity {
                 public void onError(Exception error) {
                     isLiked = !isLiked;
                     updateLikeUI();
-                    Toast.makeText(PlayerActivity.this, "Lỗi kết nối!", Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(PlayerActivity.this, "Lỗi kết nối!");
                 }
             });
         });
@@ -291,7 +289,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     player.seekTo(progress);
-                    currentTime.setText(formatTime(progress));
+                    currentTime.setText(TimeFormatter.formatDuration(progress));
                 }
             }
             @Override
@@ -331,7 +329,7 @@ public class PlayerActivity extends AppCompatActivity {
     // --- CẬP NHẬT: Hàm hiển thị Dialog chọn Playlist ---
     private void showAddToPlaylistDialog() {
         if (currentSongId == null) {
-            Toast.makeText(this, "Không thể thêm bài hát này", Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, "Không thể thêm bài hát này");
             return;
         }
 
@@ -368,12 +366,12 @@ public class PlayerActivity extends AppCompatActivity {
         playlistRepository.addSongToPlaylist(playlist.getId(), currentSongId, new PlaylistRepository.OnResultListener<Void>() {
             @Override
             public void onSuccess(Void result) {
-                Toast.makeText(PlayerActivity.this, "Đã thêm vào " + playlist.getName(), Toast.LENGTH_SHORT).show();
+                ToastUtils.showSuccess(PlayerActivity.this, "Đã thêm vào " + playlist.getName());
             }
 
             @Override
             public void onError(Exception error) {
-                Toast.makeText(PlayerActivity.this, "Lỗi: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(PlayerActivity.this, error.getMessage());
             }
         });
     }
@@ -393,14 +391,14 @@ public class PlayerActivity extends AppCompatActivity {
                 playlistRepository.createPlaylist(name, new PlaylistRepository.OnResultListener<String>() {
                     @Override
                     public void onSuccess(String playlistId) {
-                        Toast.makeText(PlayerActivity.this, "Đã tạo Playlist!", Toast.LENGTH_SHORT).show();
+                        ToastUtils.showSuccess(PlayerActivity.this, "Đã tạo Playlist!");
                         // Sau khi tạo xong, userPlaylists sẽ tự động cập nhật nhờ listener
                         // Có thể tự động thêm bài hát vào playlist vừa tạo (tùy chọn)
                     }
 
                     @Override
                     public void onError(Exception error) {
-                        Toast.makeText(PlayerActivity.this, "Lỗi tạo Playlist", Toast.LENGTH_SHORT).show();
+                        ToastUtils.showError(PlayerActivity.this, "Lỗi tạo Playlist");
                     }
                 });
             }
@@ -413,7 +411,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void downloadSong() {
         if (currentAudioUrl == null || !currentAudioUrl.startsWith("http")) {
-            Toast.makeText(this, "Không thể tải bài hát Offline", Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, "Không thể tải bài hát Offline");
             return;
         }
         try {
@@ -425,9 +423,9 @@ public class PlayerActivity extends AppCompatActivity {
 
             DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             manager.enqueue(request);
-            Toast.makeText(this, "Đang bắt đầu tải xuống...", Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, "Đang bắt đầu tải xuống...");
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi tải xuống: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, "Lỗi tải xuống: " + e.getMessage());
         }
     }
 
@@ -460,20 +458,10 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void loadCoverImage(boolean isOnline, String imageUrl, String audioUrl) {
         if (isOnline && imageUrl != null && !imageUrl.isEmpty()) {
-            Glide.with(this)
-                    .asBitmap()
-                    .load(imageUrl)
-                    .placeholder(R.drawable.ic_music)
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
-                            albumArt.setImageBitmap(bitmap);
-                            applyGradientFromBitmap(bitmap);
-                        }
-
-                        @Override
-                        public void onLoadCleared(Drawable placeholder) {}
-                    });
+            // Online: Load từ URL
+            ImageLoader.loadWithCallback(this, imageUrl, albumArt, bitmap -> {
+                applyGradientFromBitmap(bitmap);
+            });
         } else if (audioUrl != null) {
             loadAlbumArtFromMetadata(audioUrl);
         }
@@ -533,8 +521,8 @@ public class PlayerActivity extends AppCompatActivity {
                     if (duration > 0) {
                         seekBar.setMax(duration);
                         seekBar.setProgress(current);
-                        currentTime.setText(formatTime(current));
-                        totalTime.setText(formatTime(duration));
+                        currentTime.setText(TimeFormatter.formatDuration(current));
+                        totalTime.setText(TimeFormatter.formatDuration(duration));
                     }
                     handler.postDelayed(this, 1000);
                 } catch (Exception ignored) {}
@@ -547,11 +535,7 @@ public class PlayerActivity extends AppCompatActivity {
         handler.post(updateSeekBarRunnable);
     }
 
-    private String formatTime(int milliseconds) {
-        int seconds = (milliseconds / 1000) % 60;
-        int minutes = (milliseconds / (1000 * 60)) % 60;
-        return String.format("%d:%02d", minutes, seconds);
-    }
+
 
     private void setupPlayerListeners() {
         playerListener = new MusicPlayer.OnCompletionListener() {

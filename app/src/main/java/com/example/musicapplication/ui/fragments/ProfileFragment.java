@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,15 +14,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
 import com.example.musicapplication.R;
 import com.example.musicapplication.ui.activity.auth.LoginActivity;
 import com.example.musicapplication.data.repository.AuthRepository;
@@ -35,13 +31,15 @@ import com.example.musicapplication.ui.activity.other.AboutActivity;
 import com.example.musicapplication.ui.activity.other.PrivacyActivity;
 import com.example.musicapplication.model.Playlist;
 import com.example.musicapplication.player.MusicPlayer;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.ToastUtils;
+import com.example.musicapplication.utils.Logger;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
 public class ProfileFragment extends Fragment {
-    private static final String TAG = "ProfileFragment";
 
     // Header Section
     private ImageView imgAvatar;
@@ -171,7 +169,7 @@ public class ProfileFragment extends Fragment {
             }
             @Override
             public void onError(Exception error) {
-                Log.e(TAG, "Error loading detailed user data: " + error.getMessage());
+                Logger.e("Error loading detailed user data: " + error.getMessage());
             }
         });
 
@@ -189,7 +187,7 @@ public class ProfileFragment extends Fragment {
 
             @Override
             public void onError(Exception error) {
-                Log.e(TAG, "Error loading playlists count: " + error.getMessage());
+                Logger.e("Error loading playlists count: " + error.getMessage());
             }
         });
     }
@@ -211,7 +209,7 @@ public class ProfileFragment extends Fragment {
         }
         if (imgAvatar != null) {
             if (user.getPhotoUrl() != null) {
-                Glide.with(this).load(user.getPhotoUrl()).circleCrop().into(imgAvatar);
+                ImageLoader.loadCircle(getContext(), user.getPhotoUrl().toString(), imgAvatar);
             } else {
                 imgAvatar.setImageResource(R.drawable.ic_profile);
             }
@@ -230,12 +228,7 @@ public class ProfileFragment extends Fragment {
         }
 
         if (imgAvatar != null && user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
-            Glide.with(this)
-                    .load(user.getPhotoUrl())
-                    .placeholder(R.drawable.ic_profile)
-                    .error(R.drawable.ic_profile)
-                    .circleCrop()
-                    .into(imgAvatar);
+            ImageLoader.loadCircle( getContext(), user.getPhotoUrl(), imgAvatar);
         }
 
         if (tvFavoritesCount != null) {
@@ -258,7 +251,7 @@ public class ProfileFragment extends Fragment {
     private void showEditProfileDialog() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            Toast.makeText(getContext(), "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(getContext(), "Vui lòng đăng nhập");
             return;
         }
 
@@ -277,7 +270,7 @@ public class ProfileFragment extends Fragment {
         dialogAvatarPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (user.getPhotoUrl() != null) {
-            Glide.with(this).load(user.getPhotoUrl()).circleCrop().into(dialogAvatarPreview);
+            ImageLoader.loadCircle(getContext(), user.getPhotoUrl().toString(), dialogAvatarPreview);
         } else {
             dialogAvatarPreview.setImageResource(R.drawable.ic_profile);
         }
@@ -302,7 +295,7 @@ public class ProfileFragment extends Fragment {
         builder.setPositiveButton("Lưu", (dialog, which) -> {
             String newName = inputName.getText().toString().trim();
             if (newName.isEmpty()) {
-                Toast.makeText(getContext(), "Tên không được để trống", Toast.LENGTH_SHORT).show();
+                ToastUtils.showWarning(getContext(), "Tên không được để trống");
                 return;
             }
             performUpdateProfile(newName);
@@ -332,7 +325,7 @@ public class ProfileFragment extends Fragment {
                         @Override
                         public void onSuccess() {
                             pd.dismiss();
-                            Toast.makeText(getContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                            ToastUtils.showSuccess(getContext(), "Cập nhật thành công!");
                             selectedImageUri = null;
                             loadUserInfo(); // Reload UI
                         }
@@ -340,7 +333,7 @@ public class ProfileFragment extends Fragment {
                         @Override
                         public void onError(Exception e) {
                             pd.dismiss();
-                            Toast.makeText(getContext(), "Lỗi cập nhật profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            ToastUtils.showError(getContext(), "Lỗi cập nhật profile: " + e.getMessage());
                         }
                     });
                 }
@@ -348,7 +341,7 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onError(Exception e) {
                     pd.dismiss();
-                    Toast.makeText(getContext(), "Lỗi upload ảnh: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(getContext(), "Lỗi upload ảnh: " + e.getMessage());
                 }
             });
         } else {
@@ -357,14 +350,14 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onSuccess() {
                     pd.dismiss();
-                    Toast.makeText(getContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                    ToastUtils.showSuccess(getContext(), "Cập nhật thành công!");
                     loadUserInfo();
                 }
 
                 @Override
                 public void onError(Exception e) {
                     pd.dismiss();
-                    Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(getContext(), "Lỗi: " + e.getMessage());
                 }
             });
         }
@@ -374,7 +367,7 @@ public class ProfileFragment extends Fragment {
         MusicPlayer.getInstance(getContext()).stop();
         MusicPlayer.getInstance(getContext()).release();
         authRepository.logout();
-        Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(getContext(), "Đã đăng xuất");
 
         Intent intent = new Intent(getContext(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.bumptech.glide.Glide;
+import com.example.musicapplication.utils.ImageLoader;
 import com.example.musicapplication.R;
 import com.example.musicapplication.model.SliderItem;
 
@@ -59,10 +59,7 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
         }
 
         void setImage(SliderItem sliderItem) {
-            Glide.with(itemView.getContext())
-                    .load(sliderItem.getImageUrl())
-                    .centerCrop()
-                    .into(imageView);
+            ImageLoader.load(itemView.getContext(), sliderItem.getImageUrl(), imageView);
         }
     }
 

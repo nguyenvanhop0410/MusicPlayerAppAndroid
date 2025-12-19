@@ -14,10 +14,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.musicapplication.R;
 import com.example.musicapplication.model.Song;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.Logger;
 
 import java.util.List;
 
@@ -57,21 +57,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         // Load album art - support both online and local
         if (song.isOnline() && song.getImageUrl() != null && !song.getImageUrl().isEmpty()) {
             // Load from URL using Glide
-            Glide.with(context)
-                    .load(song.getImageUrl())
-                    .placeholder(R.drawable.ic_music)
-                    .error(R.drawable.ic_music)
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(holder.image);
+            ImageLoader.load(context, song.getImageUrl(), holder.image);
         } else if (song.isLocal() && song.uri != null) {
             // Load from local file metadata
             loadAlbumArtFromLocal(holder.image, song.uri);
         } else {
             // Default icon
-            Glide.with(context)
-                    .load(R.drawable.ic_music)
-                    .into(holder.image);
+            ImageLoader.load(context, R.drawable.ic_music, holder.image);
         }
 
         holder.itemView.setOnClickListener(view -> {
@@ -95,7 +87,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                 }
                 retriever.release();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.e("Error loading album art from local file: " + e.getMessage());
                 try {
                     retriever.release();
                 } catch (Exception ignored) {}
@@ -105,16 +97,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             if (context instanceof android.app.Activity) {
                 ((android.app.Activity) context).runOnUiThread(() -> {
                     if (finalAlbumArt != null) {
-                        Glide.with(context)
-                                .load(finalAlbumArt)
-                                .skipMemoryCache(true)
-                                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                .centerCrop()
-                                .into(imageView);
+                        imageView.setImageBitmap(finalAlbumArt);
                     } else {
-                        Glide.with(context)
-                                .load(R.drawable.ic_music)
-                                .into(imageView);
+                        ImageLoader.load(context, R.drawable.ic_music, imageView);
                     }
                 });
             }

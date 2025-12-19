@@ -1,24 +1,15 @@
 package com.example.musicapplication.ui.activity.album;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.example.musicapplication.R;
 import com.example.musicapplication.ui.activity.player.PlayerActivity;
 import com.example.musicapplication.ui.adapter.SongListAdapter;
@@ -27,6 +18,9 @@ import com.example.musicapplication.data.repository.SongRepository;
 import com.example.musicapplication.model.Song;
 import com.example.musicapplication.player.MusicPlayer;
 import com.example.musicapplication.player.PlaylistManager;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.ToastUtils;
+import com.example.musicapplication.utils.Logger;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -61,8 +55,8 @@ public class AlbumDetailActivity extends AppCompatActivity {
             intentAlbumImage = getIntent().getStringExtra("albumImage");
 
             // Log kiểm tra dữ liệu nhận được
-            Log.d(TAG, "Receive Intent - Name: " + currentAlbumName);
-            Log.d(TAG, "Receive Intent - ImageURL: " + intentAlbumImage);
+            Logger.d("Receive Intent - Name: " + currentAlbumName);
+            Logger.d("Receive Intent - ImageURL: " + intentAlbumImage);
         }
 
         initViews();
@@ -102,10 +96,10 @@ public class AlbumDetailActivity extends AppCompatActivity {
 
         // 1. Ưu tiên hiển thị ảnh từ Intent (nếu có)
         if (intentAlbumImage != null && !intentAlbumImage.isEmpty()) {
-            loadAlbumCover(intentAlbumImage, "Intent Source");
+            loadAlbumCover(intentAlbumImage);
             isImageSetFromIntent = true;
         } else {
-            Log.w(TAG, "Intent Image URL is null or empty");
+            Logger.e("Intent Image URL is null or empty");
             imgCover.setImageResource(R.drawable.ic_music); // Ảnh placeholder mặc định
         }
 
@@ -121,10 +115,10 @@ public class AlbumDetailActivity extends AppCompatActivity {
                     // Nếu Intent không có ảnh (hoặc ảnh lỗi), tự động lấy ảnh của bài hát đầu tiên làm ảnh bìa
                     if (!isImageSetFromIntent && !albumSongs.isEmpty()) {
                         String firstSongImage = albumSongs.get(0).getImageUrl();
-                        Log.d(TAG, "Fallback to Song Image: " + firstSongImage);
+                        Logger.d("Fallback to Song Image: " + firstSongImage);
 
                         if (firstSongImage != null && !firstSongImage.isEmpty()) {
-                            runOnUiThread(() -> loadAlbumCover(firstSongImage, "Song Fallback Source"));
+                            runOnUiThread(() -> loadAlbumCover(firstSongImage));
                         }
                     }
 
@@ -133,9 +127,9 @@ public class AlbumDetailActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(Exception error) {
-                    Log.e(TAG, "Error loading album songs", error);
+                    Logger.e(TAG, error);
                     runOnUiThread(() ->
-                            Toast.makeText(AlbumDetailActivity.this, "Lỗi tải album", Toast.LENGTH_SHORT).show()
+                            ToastUtils.showError(AlbumDetailActivity.this, "Lỗi tải album")
                     );
                 }
             });
@@ -146,40 +140,14 @@ public class AlbumDetailActivity extends AppCompatActivity {
             if (!albumSongs.isEmpty()) {
                 onSongClick(albumSongs.get(0), 0);
             } else {
-                Toast.makeText(this, "Album trống", Toast.LENGTH_SHORT).show();
+                ToastUtils.showWarning(this, "Album trống");
             }
         });
     }
 
     // Hàm load ảnh tách riêng để tái sử dụng và bắt lỗi Glide
-    private void loadAlbumCover(String url, String source) {
-        // Kiểm tra Activity còn hoạt động không để tránh crash
-        if (!isDestroyed() && !isFinishing()) {
-            Log.d(TAG, "Loading image from (" + source + "): " + url);
-
-            Glide.with(this)
-                    .load(url)
-                    .placeholder(R.drawable.ic_music)
-                    .error(R.drawable.ic_music)
-                    .listener(new RequestListener<Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            // Log lỗi chi tiết nếu Glide không tải được ảnh
-                            Log.e(TAG, "GLIDE ERROR loading: " + url);
-                            if (e != null) {
-                                e.logRootCauses(TAG);
-                            }
-                            return false; // Trả về false để Glide xử lý hiển thị ảnh error
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            Log.d(TAG, "GLIDE SUCCESS loading image from " + source);
-                            return false;
-                        }
-                    })
-                    .into(imgCover);
-        }
+    private void loadAlbumCover(String url) {
+        ImageLoader.load(this, url, imgCover);
     }
 
     private void onSongClick(Song song, int position) {

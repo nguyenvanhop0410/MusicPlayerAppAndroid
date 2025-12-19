@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.musicapplication.R;
 import com.example.musicapplication.ui.activity.player.PlayerActivity;
 import com.example.musicapplication.ui.adapter.SongListAdapter;
@@ -32,6 +30,9 @@ import com.example.musicapplication.model.Song;
 import com.example.musicapplication.model.Playlist;
 import com.example.musicapplication.player.MusicPlayer;
 import com.example.musicapplication.player.PlaylistManager;
+import com.example.musicapplication.utils.ImageLoader;
+import com.example.musicapplication.utils.Logger;
+import com.example.musicapplication.utils.ToastUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -139,9 +140,9 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             if (songList != null && !songList.isEmpty()) {
                 // Phát từ bài đầu tiên (index 0)
                 playMusic(0);
-                Toast.makeText(this, "Đang phát playlist...", Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(this, "Đang phát playlist...");
             } else {
-                Toast.makeText(this, "Playlist trống", Toast.LENGTH_SHORT).show();
+                ToastUtils.showWarning(this, "Playlist trống");
             }
         });
     }
@@ -154,10 +155,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
 
         // Load ảnh bìa nếu có
         if (currentPlaylist.getCoverImageUrl() != null && !currentPlaylist.getCoverImageUrl().isEmpty()) {
-            Glide.with(this)
-                    .load(currentPlaylist.getCoverImageUrl())
-                    .placeholder(R.drawable.ic_music)
-                    .into(imgPlaylistCover);
+            ImageLoader.loadRounded(this, currentPlaylist.getCoverImageUrl(), imgPlaylistCover, 12);
         }
     }
 
@@ -197,7 +195,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             @Override
             public void onError(Exception error) {
                 setLoading(false);
-                Toast.makeText(PlaylistDetailActivity.this, "Lỗi tải playlist", Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(PlaylistDetailActivity.this, "Lỗi tải playlist");
             }
         });
     }
@@ -261,10 +259,10 @@ public class PlaylistDetailActivity extends AppCompatActivity {
                             public void onSuccess(Void result) {
                                 currentPlaylist.setName(newName);
                                 tvName.setText(newName);
-                                Toast.makeText(PlaylistDetailActivity.this, "Đã đổi tên!", Toast.LENGTH_SHORT).show();
+                                ToastUtils.showSuccess(PlaylistDetailActivity.this, "Đã đổi tên!");
                             }
                             @Override public void onError(Exception e) {
-                                Toast.makeText(PlaylistDetailActivity.this, "Lỗi cập nhật tên", Toast.LENGTH_SHORT).show();
+                                ToastUtils.showError(PlaylistDetailActivity.this, "Lỗi cập nhật tên");
                             }
                         });
                     }
@@ -282,11 +280,11 @@ public class PlaylistDetailActivity extends AppCompatActivity {
                     playlistRepository.deletePlaylist(currentPlaylist.getId(), new PlaylistRepository.OnResultListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {
-                            Toast.makeText(PlaylistDetailActivity.this, "Đã xóa!", Toast.LENGTH_SHORT).show();
+                            ToastUtils.showSuccess(PlaylistDetailActivity.this, "Đã xóa!");
                             finish();
                         }
                         @Override public void onError(Exception e) {
-                            Toast.makeText(PlaylistDetailActivity.this, "Lỗi xóa playlist", Toast.LENGTH_SHORT).show();
+                            ToastUtils.showError(PlaylistDetailActivity.this, "Lỗi xóa playlist");
                         }
                     });
                 })
@@ -303,12 +301,12 @@ public class PlaylistDetailActivity extends AppCompatActivity {
                     playlistRepository.removeSongFromPlaylist(currentPlaylist.getId(), song.getId(), new PlaylistRepository.OnResultListener<Void>() {
                         @Override
                         public void onSuccess(Void result) {
-                            Toast.makeText(PlaylistDetailActivity.this, "Đã xóa bài hát", Toast.LENGTH_SHORT).show();
+                            ToastUtils.showSuccess(PlaylistDetailActivity.this, "Đã xóa bài hát");
                             // Refresh lại data
                             refreshPlaylistData();
                         }
                         @Override public void onError(Exception e) {
-                            Toast.makeText(PlaylistDetailActivity.this, "Lỗi xóa bài hát", Toast.LENGTH_SHORT).show();
+                            ToastUtils.showError(PlaylistDetailActivity.this, "Lỗi xóa bài hát");
                         }
                     });
                 })
@@ -321,29 +319,27 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos); // Nén ảnh
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
             byte[] data = baos.toByteArray();
 
-            // Sử dụng PlaylistRepository để update ảnh
             playlistRepository.updatePlaylistImage(currentPlaylist.getId(), data, new PlaylistRepository.OnResultListener<String>() {
                 @Override
                 public void onSuccess(String imageUrl) {
                     currentPlaylist.setCoverImageUrl(imageUrl);
-                    Glide.with(PlaylistDetailActivity.this)
-                            .load(imageUrl)
-                            .into(imgPlaylistCover);
-                    Toast.makeText(PlaylistDetailActivity.this, "Cập nhật ảnh bìa thành công!", Toast.LENGTH_SHORT).show();
+                    ImageLoader.loadRounded(PlaylistDetailActivity.this, imageUrl, imgPlaylistCover, 12);
+                    ToastUtils.showSuccess(PlaylistDetailActivity.this, "Cập nhật ảnh bìa thành công!");
                     setLoading(false);
                 }
 
                 @Override
                 public void onError(Exception error) {
-                    Toast.makeText(PlaylistDetailActivity.this, "Lỗi cập nhật ảnh: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(PlaylistDetailActivity.this, "Lỗi cập nhật ảnh: " + error.getMessage());
                     setLoading(false);
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.e("PlaylistDetail", e);
+            ToastUtils.showError(this, "Không thể tải ảnh");
             setLoading(false);
         }
     }
