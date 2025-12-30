@@ -80,4 +80,39 @@ public class ImageLoader {
     public interface OnImageLoadedListener {
         void onLoaded(Bitmap bitmap);
     }
+
+    /**
+     * Callback interface for bitmap loading
+     */
+    public interface BitmapCallback {
+        void onBitmapLoaded(Bitmap bitmap);
+        void onBitmapFailed();
+    }
+
+    /**
+     * Load bitmap cho notification (không bind với ImageView)
+     */
+    public static void loadBitmap(Context context, String url, BitmapCallback callback) {
+        Glide.with(context)
+            .asBitmap()
+            .load(url)
+            .into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap bitmap, @Nullable Transition<? super Bitmap> transition) {
+                    if (callback != null) {
+                        callback.onBitmapLoaded(bitmap);
+                    }
+                }
+
+                @Override
+                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    if (callback != null) {
+                        callback.onBitmapFailed();
+                    }
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {}
+            });
+    }
 }

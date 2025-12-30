@@ -71,6 +71,10 @@ public class SongUploadRepository {
         firestore.collection(SONGS_COLLECTION).document(song.id).set(songData)
                 .addOnSuccessListener(aVoid -> {
                     Logger.d("SongUploadRepository: Song uploaded successfully: " + song.id);
+                    
+                    // Auto-create or update artist document
+                    createOrUpdateArtist(song.artist);
+                    
                     listener.onSuccess(song.id);
                 })
                 .addOnFailureListener(e -> {
@@ -80,14 +84,66 @@ public class SongUploadRepository {
     }
 
     /**
+     * Tự động tạo hoặc cập nhật artist document khi upload bài hát
+     */
+    private void createOrUpdateArtist(String artistName) {
+        if (artistName == null || artistName.trim().isEmpty() || artistName.equals("Unknown Artist")) {
+            Logger.d("Skipping artist creation for null/empty/unknown artist");
+            return;
+        }
+        
+        try {
+            // Sử dụng artistName chuẩn hóa làm document ID để tránh duplicate
+            String artistId = artistName.trim().toLowerCase()
+                    .replaceAll("\\s+", "-")
+                    .replaceAll("[^a-z0-9-]", "")
+                    .replaceAll("-+", "-")
+                    .replaceAll("^-|-$", "");
+            
+            // Validate artistId
+            if (artistId.isEmpty() || artistId.length() < 2) {
+                Logger.w("Invalid artist ID generated from: " + artistName);
+                return;
+            }
+            
+            firestore.collection("artists").document(artistId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (!doc.exists()) {
+                            // Tạo artist document mới
+                            Map<String, Object> artistData = new HashMap<>();
+                            artistData.put("name", artistName.trim());
+                            artistData.put("followers", 0);
+                            artistData.put("imageUrl", "");
+                            artistData.put("bio", "");
+                            
+                            firestore.collection("artists").document(artistId).set(artistData)
+                                    .addOnSuccessListener(aVoid -> Logger.d("Auto-created artist: " + artistName + " (ID: " + artistId + ")"))
+                                    .addOnFailureListener(e -> Logger.e("Failed to create artist: " + artistName, e));
+                        } else {
+                            Logger.d("Artist already exists: " + artistName + " (ID: " + artistId + ")");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Logger.e("Error checking artist document: " + artistName, e);
+                        // Don't fail the whole upload if artist check fails
+                    });
+        } catch (Exception e) {
+            Logger.e("Exception in createOrUpdateArtist for: " + artistName, e);
+            // Don't crash, just log the error
+        }
+    }
+
+    /**
      * Convert Song object to Map for Firestore
      */
     private Map<String, Object> songToMap(Song song) {
         Map<String, Object> map = new HashMap<>();
-        map.put("title", song.title);
-        map.put("artist", song.artist);
-        map.put("album", song.album != null ? song.album : "");
-        map.put("audioUrl", song.audioUrl);
+        
+        // Handle null values with defaults
+        map.put("title", song.title != null ? song.title : "Unknown");
+        map.put("artist", song.artist != null ? song.artist : "Unknown Artist");
+        map.put("album", song.album != null && !song.album.isEmpty() ? song.album : "");
+        map.put("audioUrl", song.audioUrl != null ? song.audioUrl : "");
         map.put("imageUrl", song.imageUrl != null ? song.imageUrl : "");
         map.put("duration", song.duration);
         map.put("uploadDate", song.uploadDate > 0 ? song.uploadDate : System.currentTimeMillis());
@@ -95,9 +151,14 @@ public class SongUploadRepository {
         map.put("likeCount", song.likeCount);
         map.put("tags", song.tags != null ? song.tags : new ArrayList<>());
 
-        // Generate search keywords
-        List<String> keywords = SearchRepository.generateKeywords(song.title, song.artist);
-        map.put("searchKeywords", keywords);
+        // Generate search keywords (now null-safe)
+        try {
+            List<String> keywords = SearchRepository.generateKeywords(song.title, song.artist);
+            map.put("searchKeywords", keywords != null ? keywords : new ArrayList<>());
+        } catch (Exception e) {
+            Logger.e("Error generating keywords: " + e.getMessage());
+            map.put("searchKeywords", new ArrayList<>());
+        }
 
         return map;
     }

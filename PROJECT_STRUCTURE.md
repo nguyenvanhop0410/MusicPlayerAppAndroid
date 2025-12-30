@@ -28,7 +28,7 @@ app/src/main/java/com/example/musicapplication/
 │   │   ├── SongUploadRepository.java # Upload bài hát
 │   │   └── UserRepository.java      # Quản lý user
 │   │
-│   └── services/                    # Firebase services
+│   └── services/                    # Services
 │       ├── FirebaseStorageService.java
 │       └── StorageService.java
 │
@@ -240,5 +240,5 @@ app/src/main/java/com/example/musicapplication/
 
 ---
 
-**Ngày cập nhật:** 2024-12-19
+**Ngày cập nhật:** 2025-12-28
 

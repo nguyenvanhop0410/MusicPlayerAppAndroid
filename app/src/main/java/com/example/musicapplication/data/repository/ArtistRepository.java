@@ -52,23 +52,56 @@ public class ArtistRepository {
                     
                     // Counter to track completion
                     final int[] completed = {0};
+                    final boolean[] hasReturned = {false};
+                    
+                    // Timeout protection: return results after 10 seconds even if not all counts completed
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (!hasReturned[0]) {
+                            hasReturned[0] = true;
+                            Logger.w("Timeout waiting for artist song counts, returning " + artists.size() + " artists");
+                            listener.onSuccess(artists);
+                        }
+                    }, 10000);
                     
                     for (QueryDocumentSnapshot document : querySnapshot) {
-                        Artist artist = document.toObject(Artist.class);
-                        artist.setId(document.getId());
-                        
-                        // Count songs for this artist
-                        countSongsForArtist(artist.getName(), songCount -> {
-                            artist.setSongCount(songCount);
-                            artists.add(artist);
-                            completed[0]++;
+                        try {
+                            Artist artist = document.toObject(Artist.class);
+                            artist.setId(document.getId());
                             
-                            // When all artists are processed, return the list
-                            if (completed[0] == totalArtists) {
-                                Logger.d("Loaded " + artists.size() + " popular artists with song counts");
+                            // Validate artist has required fields
+                            if (artist.getName() == null || artist.getName().isEmpty()) {
+                                Logger.w("Artist document missing name field: " + document.getId());
+                                completed[0]++;
+                                if (completed[0] == totalArtists && !hasReturned[0]) {
+                                    hasReturned[0] = true;
+                                    listener.onSuccess(artists);
+                                }
+                                continue;
+                            }
+                            
+                            // Count songs for this artist
+                            countSongsForArtist(artist.getName(), songCount -> {
+                                if (!hasReturned[0]) {
+                                    artist.setSongCount(songCount);
+                                    artists.add(artist);
+                                    completed[0]++;
+                                    
+                                    // When all artists are processed, return the list
+                                    if (completed[0] == totalArtists) {
+                                        hasReturned[0] = true;
+                                        Logger.d("Loaded " + artists.size() + " popular artists with song counts");
+                                        listener.onSuccess(artists);
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            Logger.e("Error parsing artist document: " + document.getId(), e);
+                            completed[0]++;
+                            if (completed[0] == totalArtists && !hasReturned[0]) {
+                                hasReturned[0] = true;
                                 listener.onSuccess(artists);
                             }
-                        });
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -97,23 +130,56 @@ public class ArtistRepository {
                     
                     // Counter to track completion
                     final int[] completed = {0};
+                    final boolean[] hasReturned = {false};
+                    
+                    // Timeout protection
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (!hasReturned[0]) {
+                            hasReturned[0] = true;
+                            Logger.w("Timeout waiting for artist song counts, returning " + artists.size() + " artists");
+                            listener.onSuccess(artists);
+                        }
+                    }, 10000);
                     
                     for (QueryDocumentSnapshot document : querySnapshot) {
-                        Artist artist = document.toObject(Artist.class);
-                        artist.setId(document.getId());
-                        
-                        // Count songs for this artist
-                        countSongsForArtist(artist.getName(), songCount -> {
-                            artist.setSongCount(songCount);
-                            artists.add(artist);
-                            completed[0]++;
+                        try {
+                            Artist artist = document.toObject(Artist.class);
+                            artist.setId(document.getId());
                             
-                            // When all artists are processed, return the list
-                            if (completed[0] == totalArtists) {
-                                Logger.d("Loaded " + artists.size() + " artists with song counts");
+                            // Validate artist has required fields
+                            if (artist.getName() == null || artist.getName().isEmpty()) {
+                                Logger.w("Artist document missing name field: " + document.getId());
+                                completed[0]++;
+                                if (completed[0] == totalArtists && !hasReturned[0]) {
+                                    hasReturned[0] = true;
+                                    listener.onSuccess(artists);
+                                }
+                                continue;
+                            }
+                            
+                            // Count songs for this artist
+                            countSongsForArtist(artist.getName(), songCount -> {
+                                if (!hasReturned[0]) {
+                                    artist.setSongCount(songCount);
+                                    artists.add(artist);
+                                    completed[0]++;
+                                    
+                                    // When all artists are processed, return the list
+                                    if (completed[0] == totalArtists) {
+                                        hasReturned[0] = true;
+                                        Logger.d("Loaded " + artists.size() + " artists with song counts");
+                                        listener.onSuccess(artists);
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            Logger.e("Error parsing artist document: " + document.getId(), e);
+                            completed[0]++;
+                            if (completed[0] == totalArtists && !hasReturned[0]) {
+                                hasReturned[0] = true;
                                 listener.onSuccess(artists);
                             }
-                        });
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -204,6 +270,12 @@ public class ArtistRepository {
 
     // Helper method to count songs for a specific artist
     private void countSongsForArtist(String artistName, OnSongCountListener listener) {
+        if (artistName == null || artistName.isEmpty()) {
+            Logger.w("countSongsForArtist called with null/empty artist name");
+            listener.onCountComplete(0);
+            return;
+        }
+        
         firestore.collection("songs")
                 .whereEqualTo("artist", artistName)
                 .get()

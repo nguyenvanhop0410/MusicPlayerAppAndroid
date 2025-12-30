@@ -1,5 +1,7 @@
 package com.example.musicapplication.ui.activity;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -17,6 +19,8 @@ import com.example.musicapplication.R;
 import com.example.musicapplication.data.repository.SongRepository;
 import com.example.musicapplication.model.Song;
 import com.example.musicapplication.player.MusicPlayer;
+import com.example.musicapplication.player.PlaylistManager;
+import com.example.musicapplication.ui.activity.player.PlayerActivity;
 import com.example.musicapplication.ui.adapter.SongListAdapter;
 import com.example.musicapplication.utils.ImageLoader;
 import com.example.musicapplication.utils.ToastUtils;
@@ -98,14 +102,21 @@ public class ArtistDetailActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         recyclerSongs.setLayoutManager(new LinearLayoutManager(this));
         songAdapter = new SongListAdapter(this, songList, (song, position, playlist) -> {
-            // Phát bài hát
-            musicPlayer.setPlaylist(playlist, position);
-            if (song.isOnline() && song.audioUrl != null) {
-                musicPlayer.play(song.audioUrl);
-            } else if (song.uri != null) {
-                musicPlayer.play(song.uri);
-            }
-            ToastUtils.showShort(this, "Đang phát: " + song.getTitle());
+            // Set playlist vào PlaylistManager để PlayerActivity có thể next/previous
+            PlaylistManager.getInstance().setPlaylist(playlist);
+            
+            // Mở PlayerActivity với thông tin bài hát
+            Intent intent = new Intent(this, PlayerActivity.class);
+            intent.putExtra("audioUrl", song.isOnline() ? song.getAudioUrl() : song.uri);
+            intent.putExtra("songId", song.getId());
+            intent.putExtra("title", song.getTitle());
+            intent.putExtra("artist", song.getArtist());
+            intent.putExtra("album", song.getAlbum());
+            intent.putExtra("imageUrl", song.getImageUrl());
+            intent.putExtra("isOnline", song.isOnline());
+            intent.putExtra("songIndex", position);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         });
         recyclerSongs.setAdapter(songAdapter);
     }

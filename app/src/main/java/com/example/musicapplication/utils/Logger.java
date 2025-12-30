@@ -26,7 +26,9 @@ public class Logger {
     public static void i(String message) {
         Log.i(TAG, message);
     }
-    
+    public static void w(String message) {
+        Log.w(TAG, message);
+    }
     /**
      * Log repository errors
      */

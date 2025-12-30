@@ -25,12 +25,12 @@ Dự án **Music Player Android Application** là một ứng dụng nghe nhạc
 4. Tối ưu hóa hiệu năng và trải nghiệm người dùng
 
 **Mục tiêu kỹ thuật**:
-- ✅ Áp dụng 3-layer architecture (UI, Business Logic, Data)
-- ✅ Sử dụng Repository Pattern, Singleton Pattern, Handler Pattern
-- ✅ Code duplication < 5% (đạt 1.2%)
-- ✅ Test coverage > 40% (đạt 47%)
-- ✅ Performance: Cold start < 2s (đạt 1.4s)
-- ✅ Maintainability Rating A
+- Áp dụng 3-layer architecture (UI, Business Logic, Data)
+- Sử dụng Repository Pattern, Singleton Pattern, Handler Pattern
+- Đưa tỷ lệ code duplication xuống dưới 5% (thực tế đạt 1.2%)
+- Đạt test coverage trên 40% (thực tế đạt 47%)
+- Đảm bảo hiệu năng: thời gian khởi động lạnh (cold start) dưới 2 giây (thực tế đạt 1.4 giây)
+- Đạt mức Maintainability Rating A theo công cụ đánh giá chất lượng mã nguồn
 
 ---
 
@@ -38,66 +38,66 @@ Dự án **Music Player Android Application** là một ứng dụng nghe nhạc
 
 ### **7.2.1. Tính năng đã triển khai**
 
-**Nhóm 1: Authentication & User Management** ✅
-- [x] Đăng ký tài khoản với email/password
-- [x] Đăng nhập và quản lý session
-- [x] Profile management (avatar, display name, bio)
-- [x] Logout và session cleanup
+**Nhóm 1: Authentication & User Management**
+- Đăng ký tài khoản với email/password
+- Đăng nhập và quản lý session người dùng
+- Quản lý hồ sơ cá nhân (avatar, tên hiển thị, mô tả ngắn)
+- Đăng xuất và làm sạch session
 
-**Nhóm 2: Music Playback** ✅
-- [x] Phát nhạc từ Firebase Storage (streaming)
-- [x] Play, Pause, Resume controls
-- [x] Next/Previous song navigation
-- [x] Seek position với SeekBar
-- [x] Volume control (seekbar + buttons)
-- [x] Background playback
-- [x] Auto play next song on completion
+**Nhóm 2: Music Playback**
+- Phát nhạc trực tuyến từ Firebase Storage (streaming)
+- Điều khiển phát/tạm dừng/tiếp tục bài hát
+- Chuyển bài tiếp theo/trước đó
+- Tua nhanh/chậm thông qua SeekBar
+- Điều khiển âm lượng bằng thanh trượt và nút bấm
+- Hỗ trợ phát nhạc nền khi thoát khỏi màn hình chính
+- Tự động phát bài tiếp theo sau khi hoàn thành bài hiện tại
 
-**Nhóm 3: Playlist Management** ✅
-- [x] Tạo playlist mới
-- [x] Đổi tên và mô tả playlist
-- [x] Thêm/xóa bài hát khỏi playlist
-- [x] Xóa playlist
-- [x] Hiển thị danh sách playlists của user
+**Nhóm 3: Playlist Management**
+- Tạo playlist mới
+- Đổi tên và mô tả playlist
+- Thêm hoặc xóa bài hát khỏi playlist
+- Xóa playlist không còn sử dụng
+- Hiển thị danh sách các playlist của người dùng
 
-**Nhóm 4: Music Discovery** ✅
-- [x] Trang chủ với các sections (Popular, New Songs, Albums, Artists)
-- [x] Slider banner auto-scroll
-- [x] Browse by albums
-- [x] Browse by artists
-- [x] Trending songs (sorted by play count)
-- [x] Recently added songs
+**Nhóm 4: Music Discovery**
+- Trang chủ với các khu vực gợi ý (Popular, New Songs, Albums, Artists)
+- Slider banner tự động chuyển
+- Duyệt bài hát theo album
+- Duyệt bài hát theo nghệ sĩ
+- Danh sách bài hát thịnh hành (sắp xếp theo lượt nghe)
+- Danh sách bài hát mới được thêm gần đây
 
-**Nhóm 5: Search & Filter** ✅
-- [x] Real-time search (title, artist, album)
-- [x] Search results hiển thị ngay lập tức
-- [x] Filter client-side (case-insensitive)
+**Nhóm 5: Search & Filter**
+- Tìm kiếm theo thời gian thực theo tiêu đề, nghệ sĩ, album
+- Kết quả tìm kiếm hiển thị ngay lập tức
+- Lọc dữ liệu phía client, không phân biệt hoa thường
 
-**Nhóm 6: Social Features** ✅
-- [x] Like/Unlike songs (favorite)
-- [x] Liked songs library
-- [x] Share song qua social apps
-- [x] Play count tracking
-- [x] Listening history
+**Nhóm 6: Social Features**
+- Thích hoặc bỏ thích bài hát (favorite)
+- Thư viện các bài hát đã thích
+- Chia sẻ bài hát qua các ứng dụng mạng xã hội
+- Theo dõi số lượt phát bài hát
+- Lưu lại lịch sử nghe nhạc
 
-**Nhóm 7: Upload & Management** ✅
-- [x] Upload bài hát (audio file + metadata)
-- [x] Upload album art (image)
-- [x] Progress tracking khi upload
-- [x] Validation inputs
+**Nhóm 7: Upload & Management**
+- Upload bài hát (file audio kèm metadata)
+- Upload ảnh bìa album
+- Theo dõi tiến trình upload
+- Kiểm tra và xác thực dữ liệu đầu vào
 
-**Nhóm 8: Advanced Features** ✅
-- [x] Shuffle mode
-- [x] Repeat modes (Off, All, One)
-- [x] Mini player ở bottom navigation
-- [x] Album art color extraction (Palette API)
-- [x] Dynamic gradient backgrounds
+**Nhóm 8: Advanced Features**
+- Chế độ phát ngẫu nhiên (shuffle)
+- Các chế độ lặp (tắt, lặp cả danh sách, lặp một bài)
+- Mini player ở khu vực thanh điều hướng phía dưới
+- Trích xuất màu từ ảnh bìa album (Palette API)
+- Nền chuyển màu động (dynamic gradient backgrounds)
 
-**Tổng kết**: **11/15 features** hoàn thành (73%), còn 4 features nâng cao để cho phiên bản tiếp theo.
+Tổng cộng, dự án đã hoàn thành 11/15 nhóm tính năng (tương đương khoảng 73%), bốn tính năng nâng cao còn lại được lên kế hoạch cho các phiên bản tiếp theo.
 
 ### **7.2.2. Thành tựu kỹ thuật**
 
-**1. Clean Architecture Implementation** 🏆
+**1. Triển khai kiến trúc Clean Architecture**
 
 Thành công triển khai kiến trúc 3 lớp rõ ràng:
 ```
@@ -109,12 +109,12 @@ Data Layer (Repositories, Models, Firebase)
 ```
 
 **Lợi ích**:
-- Separation of concerns rõ ràng
-- Dễ test từng layer độc lập
-- Dễ thay đổi implementation (Firebase → SQLite)
-- Code maintainable và scalable
+- Phân tách rõ ràng trách nhiệm giữa các lớp (separation of concerns)
+- Dễ dàng kiểm thử từng lớp độc lập
+- Có thể thay đổi cách triển khai (ví dụ Firebase → SQLite) mà không ảnh hưởng đến toàn bộ hệ thống
+- Mã nguồn dễ bảo trì, dễ mở rộng trong tương lai
 
-**2. Handler Pattern Success** 🏆
+**2. Ứng dụng thành công Handler Pattern**
 
 Refactoring thành công các God Objects thành handlers:
 
@@ -124,7 +124,7 @@ Refactoring thành công các God Objects thành handlers:
 | HomeFragment | 400 lines | 150 lines | **-63%** |
 | Complexity | Very High | Low | **-73%** |
 
-**7 PlayerHandlers**:
+7 handler cho PlayerActivity:
 - PlayerControlHandler (play/pause/next/prev)
 - PlayerSeekBarHandler (progress tracking)
 - PlayerLikeHandler (favorite toggle)
@@ -133,16 +133,16 @@ Refactoring thành công các God Objects thành handlers:
 - PlayerPlaylistHandler (add to playlist)
 - PlayerShareHandler (share song)
 
-**5 HomeHandlers**:
+5 handler cho HomeFragment:
 - HomeAlbumsHandler
 - HomeArtistsHandler
 - HomePopularSongsHandler
 - HomeNewSongsHandler
 - HomeSliderHandler
 
-**3. Utility Classes Consolidation** 🏆
+**3. Chuẩn hóa và gom nhóm các lớp tiện ích (Utility Classes)**
 
-Tạo 6 utility classes loại bỏ 107 chỗ code trùng lặp:
+Xây dựng 6 lớp tiện ích giúp loại bỏ 107 vị trí mã bị trùng lặp:
 
 | Utility | Duplication Removed | Lines Saved |
 |---------|---------------------|-------------|
@@ -153,7 +153,7 @@ Tạo 6 utility classes loại bỏ 107 chỗ code trùng lặp:
 | ValidationUtils | 6 uses | 12 lines |
 | **TOTAL** | **107** | **219 lines** |
 
-**4. Performance Optimization** 🏆
+**4. Tối ưu hóa hiệu năng**
 
 | Metric | Target | Achieved | Status |
 |--------|--------|----------|--------|
@@ -163,23 +163,23 @@ Tạo 6 utility classes loại bỏ 107 chỗ code trùng lặp:
 | APK Size | < 10MB | 8.2MB | ✅ **Good** |
 | Test Coverage | > 40% | 47% | ✅ **Good** |
 
-**5. Firebase Integration** 🏆
+**5. Tích hợp Firebase toàn diện**
 
-Tích hợp thành công đầy đủ Firebase ecosystem:
-- ✅ Firebase Authentication (session management)
-- ✅ Cloud Firestore (6 collections, complex queries)
-- ✅ Firebase Storage (audio/image upload/download)
-- ✅ Composite Indexes (3 indexes for performance)
-- ✅ Security Rules (protect user data)
+Tích hợp thành công đầy đủ hệ sinh thái Firebase, bao gồm:
+- Firebase Authentication (quản lý phiên đăng nhập)
+- Cloud Firestore (6 collections với các truy vấn phức tạp)
+- Firebase Storage (upload/download file audio và hình ảnh)
+- Composite Indexes (3 index phục vụ tối ưu hiệu năng truy vấn)
+- Security Rules (bảo vệ dữ liệu người dùng)
 
-**6. Design Patterns Application** 🏆
+**6. Áp dụng các Design Pattern**
 
 Áp dụng thành công 3 patterns chính:
-- ✅ **Repository Pattern**: 11 repositories tách biệt data access
-- ✅ **Singleton Pattern**: MusicPlayer, PlaylistManager global instances
-- ✅ **Handler Pattern**: 15+ handlers cho UI logic separation
+- **Repository Pattern**: 11 repositories tách biệt data access
+- **Singleton Pattern**: MusicPlayer, PlaylistManager global instances
+- **Handler Pattern**: 15+ handlers cho UI logic separation
 
-**7. Code Quality Achievement** 🏆
+**7. Nâng cao chất lượng mã nguồn**
 
 | Metric | Before Refactor | After Refactor | Improvement |
 |--------|-----------------|----------------|-------------|
@@ -299,43 +299,43 @@ Tích hợp thành công đầy đủ Firebase ecosystem:
 
 ### **7.4.1. Hạn chế hiện tại**
 
-**1. Offline Playback** ⚠️
+**1. Offline Playback**
 - **Vấn đề**: Không thể nghe nhạc khi offline
 - **Nguyên nhân**: Audio streaming trực tiếp từ Firebase Storage, không cache
 - **Impact**: User phải có internet liên tục
 - **Workaround**: Cần WiFi hoặc mobile data
 
-**2. Search Performance** ⚠️
+**2. Search Performance**
 - **Vấn đề**: Search chậm với > 1000 songs
 - **Nguyên nhân**: Client-side filtering, load tất cả songs trước
 - **Impact**: User experience kém với large dataset
 - **Workaround**: Giới hạn số lượng songs tải xuống
 
-**3. No Recommendation System** ⚠️
+**3. Hệ thống gợi ý (Recommendation System)**
 - **Vấn đề**: Không có AI-powered recommendations
 - **Nguyên nhân**: Chưa implement ML models
 - **Impact**: User phải tự tìm bài hát mới
 - **Workaround**: Browse Popular/New sections
 
-**4. Media Notification Controls** ⚠️
+**4. Media Notification Controls**
 - **Vấn đề**: Không control được từ notification bar
 - **Nguyên nhân**: Chưa implement MediaSession API
 - **Impact**: Phải mở app để control playback
 - **Workaround**: Dùng mini player trong app
 
-**5. Download Feature** ⚠️
+**5. Chức năng tải xuống (Download Feature)**
 - **Vấn đề**: Không thể download songs để nghe offline
 - **Nguyên nhân**: Feature placeholder, chưa implement
 - **Impact**: Không thể tạo local library
 - **Workaround**: Phải stream mỗi lần nghe
 
-**6. Lyrics Display** ⚠️
+**6. Hiển thị lời bài hát (Lyrics Display)**
 - **Vấn đề**: Không hiển thị lời bài hát
 - **Nguyên nhân**: Chưa có lyrics database và UI
 - **Impact**: User không thể hát theo
 - **Workaround**: Dùng app khác để xem lyrics
 
-**7. Dark Mode** ⚠️
+**7. Chế độ giao diện tối (Dark Mode)**
 - **Vấn đề**: Chỉ có light theme
 - **Nguyên nhân**: Chưa implement theme switching
 - **Impact**: Khó nhìn khi dùng ban đêm
@@ -343,7 +343,7 @@ Tích hợp thành công đầy đủ Firebase ecosystem:
 
 ### **7.4.2. Thách thức kỹ thuật đã gặp**
 
-**1. Firestore playCount Crash** 🔴
+**1. Sự cố crash khi cập nhật trường playCount trên Firestore**
 
 **Vấn đề**: App crash khi increment playCount
 ```java
@@ -361,7 +361,7 @@ firestore.collection("songs").document(songId)
 
 **Bài học**: Consistency trong data types rất quan trọng
 
-**2. Fixed Timeout Loading** 🟡
+**2. Vấn đề sử dụng thời gian chờ cố định khi tải dữ liệu (Fixed Timeout Loading)**
 
 **Vấn đề**: HomeFragment ẩn loading sau 3s dù data chưa về
 ```java
@@ -386,7 +386,7 @@ OnHandlerLoadCompleteListener callback = () -> {
 
 **Bài học**: Async operations cần proper coordination
 
-**3. Memory Leaks** 🟡
+**3. Vấn đề rò rỉ bộ nhớ (Memory Leaks)**
 
 **Vấn đề**: Memory tăng dần khi mở/đóng PlayerActivity nhiều lần
 
@@ -413,7 +413,7 @@ protected void onDestroy() {
 
 **Bài học**: Luôn cleanup resources trong onDestroy()
 
-**4. Firestore Query Limits** 🟡
+**4. Giới hạn truy vấn của Firestore (Firestore Query Limits)**
 
 **Vấn đề**: `whereIn()` chỉ support max 10 items
 ```java
@@ -437,7 +437,7 @@ for (int i = 0; i < songIds.size(); i += 10) {
 
 **Bài học**: Biết limitations của platform
 
-**5. God Object Complexity** 🟡
+**5. Độ phức tạp do God Object**
 
 **Vấn đề**: PlayerActivity 500+ lines, khó đọc và maintain
 
@@ -454,7 +454,7 @@ for (int i = 0; i < songIds.size(); i += 10) {
 
 ### **7.5.1. Tính năng mới (v2.0)**
 
-**Priority 1: Offline Playback** 🎯
+**Priority 1: Offline Playback**
 
 **Mục tiêu**: Cho phép user nghe nhạc khi không có internet
 
@@ -508,7 +508,7 @@ for (int i = 0; i < songIds.size(); i += 10) {
 
 **Estimated Time**: 3 weeks
 
-**Priority 2: Lyrics Display** 🎯
+**Priority 2: Lyrics Display**
 
 **Mục tiêu**: Hiển thị lời bài hát đồng bộ với âm nhạc
 
@@ -549,7 +549,7 @@ for (int i = 0; i < songIds.size(); i += 10) {
 
 **Estimated Time**: 2 weeks
 
-**Priority 3: Smart Recommendations** 🎯
+**Priority 3: Smart Recommendations**
 
 **Mục tiêu**: Gợi ý bài hát dựa trên listening history và preferences
 
@@ -591,7 +591,7 @@ for (int i = 0; i < songIds.size(); i += 10) {
 
 **Estimated Time**: 4 weeks (simple), 8 weeks (ML)
 
-**Priority 4: Media Notification** 🎯
+**Priority 4: Media Notification**
 
 **Mục tiêu**: Control playback từ notification bar và lock screen
 
@@ -644,7 +644,7 @@ for (int i = 0; i < songIds.size(); i += 10) {
 
 ### **7.5.2. Cải tiến kỹ thuật (v2.0)**
 
-**1. Migrate to Kotlin** 🚀
+**1. Migrate to Kotlin**
 
 **Lý do**:
 - Kotlin là official language cho Android
@@ -680,7 +680,7 @@ lifecycleScope.launch {
 
 **Estimated Time**: 6 weeks (gradual migration)
 
-**2. Jetpack Compose UI** 🚀
+**2. Jetpack Compose UI**
 
 **Lý do**:
 - Modern declarative UI
@@ -714,7 +714,7 @@ fun SongItem(song: Song, onClick: () -> Unit) {
 
 **Estimated Time**: 8 weeks (full migration)
 
-**3. ExoPlayer Integration** 🚀
+**3. ExoPlayer Integration**
 
 **Lý do**:
 - Professional media player
@@ -739,7 +739,7 @@ player.play();
 
 **Estimated Time**: 2 weeks
 
-**4. Room Database (Local Cache)** 🚀
+**4. Room Database (Local Cache)**
 
 **Lý do**:
 - Offline support
@@ -770,7 +770,7 @@ public interface SongDao {
 
 **Estimated Time**: 3 weeks
 
-**5. Dependency Injection (Hilt)** 🚀
+**5. Dependency Injection (Hilt)**
 
 **Lý do**:
 - Better dependency management
@@ -840,31 +840,31 @@ Dự án **Music Player Android Application** đã thành công trong việc xâ
 
 **Điểm nổi bật**:
 
-1. **Kiến trúc Clean Code** ✨
+1. Kiến trúc clean code
    - Áp dụng thành công 3-layer architecture
    - Separation of concerns rõ ràng
    - Code maintainable và scalable
    - Dễ dàng mở rộng và sửa đổi
 
-2. **Handler Pattern Innovation** ✨
+2. Ứng dụng Handler Pattern trong tổ chức mã nguồn
    - Refactoring thành công God Objects
    - Giảm 70% code trong PlayerActivity
    - Tăng 123% maintainability
    - Pattern có thể áp dụng cho projects khác
 
-3. **Code Quality Excellence** ✨
+3. Nâng cao chất lượng mã nguồn
    - Duplication chỉ 1.2% (industry standard < 5%)
    - Test coverage 47% (vượt mục tiêu 40%)
    - Maintainability Rating A
    - Technical debt thấp (2.5 days)
 
-4. **Performance Optimization** ✨
+4. Tối ưu hóa hiệu năng
    - Cold start 1.4s (target < 2s)
    - Memory usage 38MB (target < 50MB)
    - Smooth 60fps playback
    - Battery efficient
 
-5. **User Satisfaction** ✨
+5. Đánh giá từ phía người dùng
    - Rating 4.3/5 từ beta users
    - 100% test pass rate
    - Stable (0.8% crash rate)

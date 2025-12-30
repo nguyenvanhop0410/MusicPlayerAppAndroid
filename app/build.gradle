@@ -63,6 +63,9 @@ dependencies {
     implementation libs.glide
     annotationProcessor libs.glide.compiler
     
+    // Media support for notification controls
+    implementation "androidx.media:media:1.7.0"
+    
     // Testing
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

@@ -109,10 +109,24 @@ public class SearchRepository {
      */
     public static List<String> generateKeywords(String title, String artist) {
         Set<String> keywords = new HashSet<>();
-        String fullText = (title + " " + artist).trim();
+        
+        // Handle null values
+        String safeTitle = title != null ? title : "";
+        String safeArtist = artist != null ? artist : "";
+        
+        String fullText = (safeTitle + " " + safeArtist).trim();
+        
+        if (fullText.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
         String normalizedText = removeAccent(fullText);
-        String[] words = normalizedText.split(" ");
-        for (String w : words) if (!w.isEmpty()) keywords.add(w);
+        String[] words = normalizedText.split("\\s+");
+        for (String w : words) {
+            if (w != null && !w.isEmpty()) {
+                keywords.add(w);
+            }
+        }
         return new ArrayList<>(keywords);
     }
 
